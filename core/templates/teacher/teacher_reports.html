@@ -389,45 +389,7 @@ td:last-child{
             <canvas id="attendanceChart"></canvas>
         </div>
     </div>
-    <div class="table-card" style="margin-bottom:25px;">
 
-    <h3>📸 Upload Class Evidence Photo</h3>
-
-    <form method="POST"
-          enctype="multipart/form-data"
-          action="{% url 'upload_attendance_evidence' %}">
-
-        {% csrf_token %}
-
-        <div class="filter-grid">
-
-            <select name="subject_id" required>
-                <option value="">Select Subject</option>
-                {% for subject in subjects %}
-                <option value="{{ subject.id }}">{{ subject.name }}</option>
-                {% endfor %}
-            </select>
-
-            <select name="class_id" required>
-                <option value="">Select Class</option>
-                {% for cls in classes %}
-                <option value="{{ cls.id }}">{{ cls.name }}</option>
-                {% endfor %}
-            </select>
-
-            <input type="file" name="photo" accept="image/*" required>
-
-        </div>
-
-        <br>
-
-        <button class="filter-btn" type="submit">
-            📸 Upload Evidence Photo
-        </button>
-
-    </form>
-
-    </div>
     <div class="table-card">
         <h3>Attendance Records</h3>
 

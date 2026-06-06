@@ -125,6 +125,14 @@ def mark_attendance(request):
             department=selected_department,
             class_name=selected_class
         )
+        evidence_id = request.POST.get("evidence_id")
+
+        evidence = None
+
+        if evidence_id:
+            evidence = AttendanceEvidence.objects.filter(
+                id=evidence_id
+            ).first()
 
         saved_count = 0
 
@@ -136,7 +144,8 @@ def mark_attendance(request):
                     student=student,
                     subject=selected_subject,
                     status=status,
-                    timestamp=timezone.now()
+                    timestamp=timezone.now(),
+                    evidence=evidence
                 )
                 saved_count += 1
 
@@ -500,38 +509,87 @@ def edit_attendance(request, attendance_id):
 @login_required
 def upload_attendance_evidence(request):
 
-    teacher = Teacher.objects.filter(user=request.user).first()
+    print("=" * 50)
+    print("UPLOAD EVIDENCE VIEW HIT")
+    print("METHOD:", request.method)
+
+    teacher = Teacher.objects.filter(
+        user=request.user
+    ).first()
 
     if not teacher:
-        return redirect("/teacher-login/")
+        return JsonResponse({
+            "success": False,
+            "error": "Teacher not found"
+        })
 
-    if request.method == "POST":
+    if request.method != "POST":
+        return JsonResponse({
+            "success": False,
+            "error": "Invalid request method"
+        })
+
+    try:
+
+        print("POST DATA:", request.POST)
+        print("FILES:", request.FILES)
+
         subject_id = request.POST.get("subject_id")
         class_id = request.POST.get("class_id")
         photo = request.FILES.get("photo")
 
-        if not photo:
-            messages.error(request, "Please upload a class photo.")
-            return redirect("/teacher/reports/")
+        print("SUBJECT ID:", subject_id)
+        print("CLASS ID:", class_id)
+        print("PHOTO:", photo)
 
-        subject = teacher.subjects.filter(id=subject_id).first()
-        class_room = teacher.classes.filter(id=class_id).first()
+        if not photo:
+            return JsonResponse({
+                "success": False,
+                "error": "No photo received"
+            })
+
+        subject = teacher.subjects.filter(
+            id=subject_id
+        ).first()
+
+        class_room = teacher.classes.filter(
+            id=class_id
+        ).first()
+
+        print("SUBJECT:", subject)
+        print("CLASS:", class_room)
 
         if not subject or not class_room:
-            messages.error(request, "Invalid class or subject.")
-            return redirect("/teacher/reports/")
+            return JsonResponse({
+                "success": False,
+                "error": "Invalid subject or class"
+            })
 
-        AttendanceEvidence.objects.create(
+        evidence = AttendanceEvidence.objects.create(
             teacher=teacher,
             subject=subject,
             class_room=class_room,
             photo=photo
         )
 
-        messages.success(request, "Class evidence photo uploaded successfully.")
-        return redirect("/teacher/reports/")
-    
+        print("EVIDENCE SAVED:", evidence.id)
+        print("PHOTO PATH:", evidence.photo.url)
 
+        return JsonResponse({
+            "success": True,
+            "evidence_id": evidence.id,
+            "photo_url": evidence.photo.url
+        })
+
+    except Exception as e:
+
+        print("UPLOAD ERROR:", str(e))
+
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        })
+    
 @login_required
 def view_evidence(request, attendance_id):
 
@@ -539,10 +597,7 @@ def view_evidence(request, attendance_id):
         id=attendance_id
     )
 
-    evidence = AttendanceEvidence.objects.filter(
-        subject=attendance.subject,
-        class_room=attendance.student.class_name
-    ).order_by('-uploaded_at').first()
+    evidence = attendance.evidence
 
     return render(
         request,

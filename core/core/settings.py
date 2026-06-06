@@ -1,4 +1,6 @@
 from pathlib import Path
+import os
+
 
 # BASE DIRECTORY
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -7,9 +9,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 SECRET_KEY = 'django-insecure-change-this-key'
 
-DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+
+ALLOWED_HOSTS = [
+    ".onrender.com",
+    "localhost",
+    "127.0.0.1",
+]
 
 # APPLICATIONS
 INSTALLED_APPS = [
@@ -118,9 +125,10 @@ LOGOUT_REDIRECT_URL = '/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # where your CSS/JS are stored during development
-STATICFILES_DIRS = [
-    BASE_DIR / 'static'
-]
+STATICFILES_DIRS = []
+
+# OR create:
+# core/static/
 
 
 # ================================

@@ -189,7 +189,6 @@ class StudentFace(models.Model):
             f"- Face"
         )
 
-
 # =====================================
 # ATTENDANCE MODEL
 # =====================================
@@ -197,74 +196,63 @@ class StudentFace(models.Model):
 class Attendance(models.Model):
 
     STATUS_CHOICES = [
-
         ('Present', 'Present'),
-
         ('Absent', 'Absent'),
-
         ('Late', 'Late'),
     ]
 
     student = models.ForeignKey(
-
         Student,
-
         on_delete=models.CASCADE
     )
 
     subject = models.ForeignKey(
-
         Subject,
-
         on_delete=models.CASCADE,
-
         null=True,
-
         blank=True
     )
 
     timestamp = models.DateTimeField(
-
         default=timezone.now
     )
 
     status = models.CharField(
-
         max_length=10,
-
         choices=STATUS_CHOICES,
-
         default='Present'
     )
 
     marked_by_ai = models.BooleanField(
-
         default=True
     )
 
-    created_at = models.DateTimeField(
+    evidence = models.ForeignKey(
+        "AttendanceEvidence",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="attendance_records"
+    )
 
+    created_at = models.DateTimeField(
         auto_now_add=True
     )
 
     def __str__(self):
 
         subject_name = (
-
             self.subject.name
-
             if self.subject
-
             else "No Subject"
         )
 
         return (
-
             f"{self.student.user.first_name} - "
             f"{subject_name} - "
             f"{self.status}"
-        )   
-    
+        )
+
 # =====================================
 # ATTENDANCE EVIDENCE MODEL
 # =====================================
@@ -295,4 +283,4 @@ class AttendanceEvidence(models.Model):
     )
 
     def __str__(self):
-        return f"{self.class_room.name} - {self.subject.name}"
+        return f"{self.class_room.name} - {self.subject.name}" 

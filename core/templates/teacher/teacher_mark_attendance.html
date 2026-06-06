@@ -454,6 +454,7 @@ const detectSound = new Audio(
 let scannedStudents = new Set();
 let attendanceStarted = false;
 let scanInterval = null;
+let currentEvidenceId = null;
 let isSavingAttendance = false;
 let isCapturingFrame = false;
 
@@ -522,6 +523,10 @@ async function switchCamera(cameraType){
 }
 
 async function startAttendance(){
+    if(!currentEvidenceId){
+    alert("Please capture evidence photo first.");
+    return;
+}
     if(attendanceStarted){
         return;
     }
@@ -572,7 +577,8 @@ async function stopAttendance(){
             body:JSON.stringify({
                 subject_id:"{{ selected_subject.id }}",
                 class_id:"{{ selected_class.id }}",
-                detected_ids:detectedIds
+                detected_ids:detectedIds,
+                evidence_id: currentEvidenceId
             })
         });
 
@@ -800,48 +806,81 @@ async function captureEvidence(){
         return;
     }
 
-    const evidenceCanvas =
-        document.createElement("canvas");
+    const evidenceCanvas = document.createElement("canvas");
 
-    evidenceCanvas.width =
-        video.videoWidth;
+    evidenceCanvas.width = video.videoWidth;
+    evidenceCanvas.height = video.videoHeight;
 
-    evidenceCanvas.height =
-        video.videoHeight;
+    const ctx = evidenceCanvas.getContext("2d");
 
-    const ctx =
-        evidenceCanvas.getContext("2d");
+    ctx.drawImage(video, 0, 0);
 
-    ctx.drawImage(
-        video,
-        0,
-        0
-    );
+    document.getElementById("evidencePreview").innerHTML =
+        `<img src="${evidenceCanvas.toDataURL('image/jpeg',0.95)}"
+        style="width:100%;max-height:420px;object-fit:cover;border-radius:22px;">`;
 
-    const image =
-        evidenceCanvas.toDataURL(
-            "image/jpeg",
-            0.95
+    statusText.innerHTML = "📤 Uploading Evidence...";
+
+    evidenceCanvas.toBlob(async function(blob){
+
+        const formData = new FormData();
+
+        formData.append(
+            "photo",
+            blob,
+            "evidence.jpg"
         );
 
-    document.getElementById("evidencePreview").innerHTML = `
-        <img
-            src="${image}"
-            style="
-            width:100%;
-            max-height:420px;
-            object-fit:cover;
-            border-radius:22px;
-            ">
-    `;
+        formData.append(
+            "subject_id",
+            "{{ selected_subject.id }}"
+        );
 
-    statusText.innerHTML =
-        "📸 Evidence Captured";
+        formData.append(
+            "class_id",
+            "{{ selected_class.id }}"
+        );
+
+        try{
+
+            const response = await fetch(
+                "/teacher/upload-evidence/",
+                {
+                    method:"POST",
+                    headers:{
+                        "X-CSRFToken":"{{ csrf_token }}"
+                    },
+                    body:formData
+                }
+            );
+
+            const data = await response.json();
+
+            if(data.success){
+
+                currentEvidenceId = data.evidence_id;
+
+                statusText.innerHTML =
+                    "✅ Evidence Saved Successfully";
+
+            }else{
+
+                statusText.innerHTML =
+                    "❌ Evidence Save Failed";
+
+                console.log(data);
+            }
+
+        }catch(error){
+
+            console.log(error);
+
+            statusText.innerHTML =
+                "❌ Upload Error";
+        }
+
+    }, "image/jpeg", 0.95);
 }
-
-window.addEventListener("beforeunload", () => {
-    stopCameraOnly();
-});
 
 function addStudentCard(student){
     studentsGrid.innerHTML += `

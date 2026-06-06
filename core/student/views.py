@@ -40,7 +40,8 @@ from .models import (
     Student,
     Attendance,
     Subject,
-    StudentFace
+    StudentFace,
+    AttendanceEvidence
 )
 
 from ultralytics import YOLO
@@ -1977,8 +1978,21 @@ def finalize_ai_attendance(request):
     subject_id = data.get("subject_id")
     class_id = data.get("class_id")
     detected_ids = data.get("detected_ids", [])
+    evidence_id = data.get("evidence_id")
 
-    subject = Subject.objects.get(id=subject_id)
+    subject = Subject.objects.get(
+        id=subject_id
+    )
+
+    evidence = None
+
+    if evidence_id:
+        try:
+            evidence = AttendanceEvidence.objects.get(
+                id=evidence_id
+            )
+        except AttendanceEvidence.DoesNotExist:
+            evidence = None
 
     students = Student.objects.filter(
         class_name_id=class_id
@@ -1992,9 +2006,12 @@ def finalize_ai_attendance(request):
     for student in students:
 
         if str(student.id) in detected_ids:
+
             status = "Present"
             present_count += 1
+
         else:
+
             status = "Absent"
             absent_count += 1
 
@@ -2002,7 +2019,8 @@ def finalize_ai_attendance(request):
             student=student,
             subject=subject,
             status=status,
-            timestamp=timezone.now()
+            timestamp=timezone.now(),
+            evidence=evidence
         )
 
     return JsonResponse({
