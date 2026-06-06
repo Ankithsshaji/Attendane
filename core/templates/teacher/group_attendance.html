@@ -1,0 +1,496 @@
+{% extends 'teacher/base.html' %}
+
+{% block content %}
+
+<style>
+.ai-page{
+    display:grid;
+    gap:24px;
+    animation:pageIn .7s ease;
+}
+
+@keyframes pageIn{
+    from{opacity:0;transform:translateY(24px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+.ai-hero{
+    background:linear-gradient(135deg,#2563eb,#7c3aed,#06b6d4);
+    border-radius:34px;
+    padding:32px;
+    color:white;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 26px 70px rgba(37,99,235,.25);
+}
+
+.ai-hero::after{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.22);
+    right:-70px;
+    bottom:-90px;
+    animation:spin 18s linear infinite;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg);}
+}
+
+.ai-hero h1{
+    font-size:38px;
+    font-weight:950;
+}
+
+.ai-hero p{
+    margin-top:8px;
+    color:#dbeafe;
+    font-weight:750;
+}
+
+.ai-grid{
+    display:grid;
+    grid-template-columns:1fr 330px;
+    gap:24px;
+}
+
+.camera-panel,
+.side-panel,
+.students-panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:32px;
+    padding:24px;
+    box-shadow:0 20px 50px rgba(15,23,42,.08);
+}
+
+.subject-select select{
+    width:100%;
+    height:56px;
+    border-radius:18px;
+    border:1px solid var(--border);
+    background:var(--surface2);
+    color:var(--text);
+    padding:0 16px;
+    font-weight:850;
+    outline:none;
+    margin-bottom:20px;
+}
+
+.video-wrapper{
+    position:relative;
+    overflow:hidden;
+    border-radius:30px;
+    background:#020617;
+    border:4px solid rgba(37,99,235,.45);
+    box-shadow:0 24px 60px rgba(0,0,0,.25);
+}
+
+video{
+    width:100%;
+    height:560px;
+    object-fit:cover;
+    display:block;
+    transform:scaleX(-1);
+}
+
+#overlay{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+}
+
+.control-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-top:20px;
+}
+
+.action-btn{
+    height:56px;
+    border:none;
+    border-radius:18px;
+    color:white;
+    font-size:16px;
+    font-weight:950;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.start-btn{
+    background:linear-gradient(135deg,#22c55e,#14b8a6);
+}
+
+.stop-btn{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+}
+
+.action-btn:hover{
+    transform:translateY(-5px);
+    box-shadow:0 18px 35px rgba(0,0,0,.18);
+}
+
+.status-box{
+    padding:22px;
+    border-radius:26px;
+    background:linear-gradient(135deg,rgba(37,99,235,.16),rgba(124,58,237,.12));
+    border:1px solid var(--border);
+    margin-bottom:18px;
+}
+
+.status-box h3{
+    color:var(--text);
+    font-size:20px;
+    font-weight:950;
+    margin-bottom:8px;
+}
+
+.status{
+    color:#38bdf8;
+    font-weight:950;
+    font-size:18px;
+}
+
+.total-box{
+    padding:24px;
+    border-radius:28px;
+    background:linear-gradient(135deg,#f59e0b,#ef4444);
+    color:white;
+    text-align:center;
+    box-shadow:0 20px 45px rgba(245,158,11,.22);
+}
+
+.total-box h2{
+    font-size:46px;
+    font-weight:950;
+    margin-top:8px;
+}
+
+.scan-dot{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#22c55e;
+    display:inline-block;
+    margin-right:8px;
+    box-shadow:0 0 0 rgba(34,197,94,.7);
+    animation:pulse 1.4s infinite;
+}
+
+@keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(34,197,94,.7);}
+    70%{box-shadow:0 0 0 14px rgba(34,197,94,0);}
+    100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}
+}
+
+.students-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+    margin-top:18px;
+}
+
+.student-card{
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-left:5px solid #22c55e;
+    border-radius:22px;
+    padding:18px;
+    animation:studentIn .45s ease;
+}
+
+@keyframes studentIn{
+    from{opacity:0;transform:scale(.92) translateY(15px);}
+    to{opacity:1;transform:scale(1) translateY(0);}
+}
+
+.student-card h3{
+    color:var(--text);
+    font-size:20px;
+    font-weight:950;
+}
+
+.student-card p{
+    color:#22c55e;
+    font-weight:950;
+    margin-top:8px;
+}
+
+.empty-note{
+    color:var(--muted);
+    font-weight:800;
+    text-align:center;
+    padding:25px;
+}
+
+canvas#canvas{
+    display:none;
+}
+
+@media(max-width:1100px){
+    .ai-grid{
+        grid-template-columns:1fr;
+    }
+
+    video{
+        height:420px;
+    }
+}
+
+@media(max-width:650px){
+    .control-row{
+        grid-template-columns:1fr;
+    }
+
+    .ai-hero h1{
+        font-size:30px;
+    }
+
+    video{
+        height:320px;
+    }
+}
+</style>
+
+<div class="ai-page">
+
+    <section class="ai-hero">
+        <h1>🎓 AI Group Attendance System</h1>
+        <p>Scan students with camera, detect known faces, and mark attendance automatically.</p>
+    </section>
+
+    <section class="ai-grid">
+
+        <div class="camera-panel">
+
+            <div class="subject-select">
+                <select id="subject">
+                    <option value="">Select Subject</option>
+
+                    {% for subject in subjects %}
+                        <option value="{{ subject.id }}">
+                            {{ subject.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="video-wrapper">
+                <video id="video" autoplay playsinline muted></video>
+                <canvas id="overlay"></canvas>
+            </div>
+
+            <div class="control-row">
+                <button class="action-btn start-btn" onclick="startAttendance()" type="button">
+                    ▶ Start AI Attendance
+                </button>
+
+                <button class="action-btn stop-btn" onclick="stopAttendance()" type="button">
+                    ⏹ Stop Scanning
+                </button>
+            </div>
+
+        </div>
+
+        <div class="side-panel">
+
+            <div class="status-box">
+                <h3>Scanner Status</h3>
+                <div class="status" id="status">
+                    Waiting to start...
+                </div>
+            </div>
+
+            <div class="total-box">
+                <div>👥 Total Present</div>
+                <h2 id="totalCount">0</h2>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="students-panel">
+        <h2 style="color:var(--text);font-weight:950;">Detected Students</h2>
+
+        <div class="students-grid" id="studentsGrid">
+            <div class="empty-note" id="emptyNote">
+                No students detected yet.
+            </div>
+        </div>
+
+        <canvas id="canvas"></canvas>
+    </section>
+
+</div>
+
+<script>
+const video = document.getElementById('video');
+const statusText = document.getElementById('status');
+const studentsGrid = document.getElementById('studentsGrid');
+const totalCount = document.getElementById('totalCount');
+const canvas = document.getElementById('canvas');
+const overlay = document.getElementById('overlay');
+const overlayCtx = overlay.getContext('2d');
+
+let scannedStudents = new Set();
+let attendanceStarted = false;
+let currentStream = null;
+let scanInterval = null;
+
+async function startCamera(){
+    try{
+        if(currentStream){
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video:{
+                width:{ ideal:1280 },
+                height:{ ideal:720 },
+                facingMode:"user"
+            },
+            audio:false
+        });
+
+        currentStream = stream;
+        video.srcObject = stream;
+        video.style.transform = "scaleX(-1)";
+        await video.play();
+
+        statusText.innerHTML = "✅ Camera Ready";
+    }catch(error){
+        console.log(error);
+        statusText.innerHTML = "❌ Camera Error";
+        alert("Unable to access camera");
+    }
+}
+
+startCamera();
+
+function startAttendance(){
+    const subject = document.getElementById('subject').value;
+
+    if(subject === ""){
+        alert("Please select subject");
+        return;
+    }
+
+    if(attendanceStarted){
+        return;
+    }
+
+    attendanceStarted = true;
+    statusText.innerHTML = `<span class="scan-dot"></span> AI Scanning Started`;
+
+    scanInterval = setInterval(async () => {
+        await captureFrame();
+    }, 3000);
+}
+
+function stopAttendance(){
+    attendanceStarted = false;
+
+    if(scanInterval){
+        clearInterval(scanInterval);
+        scanInterval = null;
+    }
+
+    overlayCtx.clearRect(0,0,overlay.width,overlay.height);
+    statusText.innerHTML = "⏹ Scanning Stopped";
+}
+
+async function captureFrame(){
+    if(!attendanceStarted || !video.videoWidth){
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    overlay.width = video.videoWidth;
+    overlay.height = video.videoHeight;
+
+    ctx.setTransform(-1,0,0,1,canvas.width,0);
+    ctx.drawImage(video,0,0,canvas.width,canvas.height);
+    ctx.setTransform(1,0,0,1,0,0);
+
+    const image = canvas.toDataURL('image/jpeg');
+    const subjectId = document.getElementById('subject').value;
+
+    try{
+        const response = await fetch('/recognize-group/', {
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json',
+                'X-CSRFToken':'{{ csrf_token }}'
+            },
+            body:JSON.stringify({
+                image:image,
+                subject_id:subjectId
+            })
+        });
+
+        const data = await response.json();
+
+        overlayCtx.clearRect(0,0,overlay.width,overlay.height);
+
+        if(data.students){
+            statusText.innerHTML = `✅ ${data.students.length} Student(s) Detected`;
+
+            data.students.forEach(student => {
+                if(student.location){
+                    const top = student.location.top;
+                    const right = student.location.right;
+                    const bottom = student.location.bottom;
+                    const left = student.location.left;
+
+                    overlayCtx.strokeStyle = "#22c55e";
+                    overlayCtx.lineWidth = 4;
+                    overlayCtx.strokeRect(left,top,right-left,bottom-top);
+
+                    overlayCtx.fillStyle = "#22c55e";
+                    overlayCtx.font = "20px Arial";
+                    overlayCtx.fillText(student.name,left,top-10);
+                }
+
+                if(!scannedStudents.has(student.id)){
+                    scannedStudents.add(student.id);
+                    addStudentCard(student);
+                }
+            });
+
+            totalCount.innerHTML = scannedStudents.size;
+        }
+
+    }catch(error){
+        console.log(error);
+        statusText.innerHTML = "❌ Detection Error";
+    }
+}
+
+function addStudentCard(student){
+    const emptyNote = document.getElementById("emptyNote");
+
+    if(emptyNote){
+        emptyNote.remove();
+    }
+
+    studentsGrid.innerHTML += `
+        <div class="student-card">
+            <h3>${student.name}</h3>
+            <p>✅ Present</p>
+        </div>
+    `;
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,363 @@
+{% extends 'teacher/base.html' %}
+
+{% block title %}Teacher Settings{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block content %}
+
+<style>
+:root{
+    --set-bg:#eef4ff;
+    --set-card:#ffffff;
+    --set-text:#0f172a;
+    --set-muted:#64748b;
+    --set-border:#e2e8f0;
+}
+
+body.dark{
+    --set-bg:#020617;
+    --set-card:#0f172a;
+    --set-text:#f8fafc;
+    --set-muted:#94a3b8;
+    --set-border:#1e293b;
+}
+
+.settings-page{
+    min-height:100vh;
+    padding:35px;
+    color:var(--set-text);
+    background:
+        radial-gradient(circle at 10% 10%,rgba(37,99,235,.20),transparent 28%),
+        radial-gradient(circle at 90% 15%,rgba(168,85,247,.20),transparent 28%),
+        var(--set-bg);
+    animation:pageIn .7s ease;
+}
+
+@keyframes pageIn{
+    from{opacity:0;transform:translateY(28px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+.settings-panel{
+    max-width:950px;
+    margin:auto;
+    overflow:hidden;
+    border-radius:36px;
+    background:var(--set-card);
+    border:1px solid var(--set-border);
+    box-shadow:0 30px 90px rgba(15,23,42,.14);
+}
+
+.settings-hero{
+    position:relative;
+    overflow:hidden;
+    padding:45px;
+    color:white;
+    background:linear-gradient(135deg,#020617,#2563eb,#7c3aed,#06b6d4);
+}
+
+.settings-hero::before{
+    content:"";
+    position:absolute;
+    inset:-60%;
+    background:conic-gradient(from 90deg,transparent,rgba(255,255,255,.25),transparent);
+    animation:spinGlow 12s linear infinite;
+}
+
+@keyframes spinGlow{
+    to{transform:rotate(360deg);}
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.hero-content h1{
+    margin:0;
+    font-size:40px;
+    font-weight:950;
+}
+
+.hero-content p{
+    margin-top:10px;
+    color:#dbeafe;
+    font-weight:750;
+}
+
+.settings-body{
+    padding:34px;
+    display:grid;
+    gap:24px;
+}
+
+.setting-card{
+    position:relative;
+    overflow:hidden;
+    padding:26px;
+    border-radius:28px;
+    background:var(--set-card);
+    border:1px solid var(--set-border);
+    box-shadow:0 18px 45px rgba(15,23,42,.08);
+    transition:.35s ease;
+    animation:cardUp .6s ease both;
+}
+
+@keyframes cardUp{
+    from{opacity:0;transform:translateY(22px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+.setting-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 26px 60px rgba(37,99,235,.16);
+}
+
+.card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+    flex-wrap:wrap;
+}
+
+.card-title h3{
+    margin:0;
+    font-size:22px;
+    font-weight:950;
+    color:var(--set-text);
+}
+
+.card-title p{
+    margin-top:7px;
+    color:var(--set-muted);
+    font-weight:700;
+}
+
+.input-grid{
+    display:grid;
+    gap:14px;
+    margin-top:20px;
+}
+
+.input-grid input{
+    width:100%;
+    padding:15px 16px;
+    border-radius:16px;
+    border:1px solid var(--set-border);
+    background:var(--set-bg);
+    color:var(--set-text);
+    outline:none;
+    font-size:15px;
+}
+
+.input-grid input:focus{
+    border-color:#38bdf8;
+    box-shadow:0 0 0 5px rgba(56,189,248,.14);
+}
+
+.btn{
+    border:none;
+    padding:14px 23px;
+    border-radius:16px;
+    color:white;
+    cursor:pointer;
+    font-weight:950;
+    background:linear-gradient(135deg,#2563eb,#06b6d4);
+    box-shadow:0 14px 35px rgba(37,99,235,.25);
+    transition:.3s ease;
+}
+
+.btn:hover{
+    transform:translateY(-4px) scale(1.03);
+}
+
+.danger-btn{
+    background:linear-gradient(135deg,#ef4444,#f97316);
+}
+
+.switch{
+    width:70px;
+    height:38px;
+    display:inline-block;
+    position:relative;
+}
+
+.switch input{
+    display:none;
+}
+
+.slider{
+    position:absolute;
+    inset:0;
+    cursor:pointer;
+    border-radius:999px;
+    background:#94a3b8;
+    transition:.4s;
+}
+
+.slider::before{
+    content:"";
+    position:absolute;
+    width:30px;
+    height:30px;
+    left:4px;
+    bottom:4px;
+    border-radius:50%;
+    background:white;
+    transition:.4s;
+    box-shadow:0 6px 18px rgba(0,0,0,.25);
+}
+
+.switch input:checked + .slider{
+    background:linear-gradient(135deg,#2563eb,#06b6d4);
+}
+
+.switch input:checked + .slider::before{
+    transform:translateX(32px);
+}
+
+.success,.error{
+    padding:15px 18px;
+    border-radius:18px;
+    font-weight:850;
+}
+
+.success{
+    background:#22c55e22;
+    color:#16a34a;
+}
+
+.error{
+    background:#ef444422;
+    color:#ef4444;
+}
+
+@media(max-width:650px){
+    .settings-page{
+        padding:16px;
+    }
+
+    .settings-hero{
+        padding:30px;
+    }
+
+    .hero-content h1{
+        font-size:30px;
+    }
+
+    .settings-body{
+        padding:20px;
+    }
+}
+</style>
+
+<div class="settings-page">
+
+    <section class="settings-panel">
+
+        <div class="settings-hero">
+            <div class="hero-content">
+                <h1>⚙️ Settings</h1>
+                <p>Manage your teacher account, security and theme.</p>
+            </div>
+        </div>
+
+        <div class="settings-body">
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'error' %}error{% else %}success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" action="/teacher/change-password/">
+                {% csrf_token %}
+
+                <div class="setting-card">
+                    <div class="card-title">
+                        <h3>🔐 Update Password</h3>
+                        <p>Use a strong password to keep your teacher account secure.</p>
+                    </div>
+
+                    <div class="input-grid">
+                        <input type="password" name="current_password" placeholder="Current Password" required>
+                        <input type="password" name="new_password" placeholder="New Password" required>
+                        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+                        <button class="btn" type="submit">Update Password</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="setting-card">
+                <div class="card-top">
+                    <div class="card-title">
+                        <h3>👤 Edit Profile</h3>
+                        <p>Update your photo, name, phone number and teacher details.</p>
+                    </div>
+
+                    <a href="/teacher/profile/">
+                        <button class="btn" type="button">Edit Profile</button>
+                    </a>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <div class="card-top">
+                    <div class="card-title">
+                        <h3>🌙 Dark Mode</h3>
+                        <p>Switch between dark mode and light mode.</p>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="darkToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-card">
+                <div class="card-top">
+                    <div class="card-title">
+                        <h3>🚪 Logout Account</h3>
+                        <p>Safely logout from your teacher dashboard.</p>
+                    </div>
+
+                    <a href="/teacher/logout/">
+                        <button class="btn danger-btn" type="button">Logout</button>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+const darkToggle = document.getElementById('darkToggle');
+
+function setTheme(theme){
+    if(theme === 'dark'){
+        document.body.classList.add('dark');
+        localStorage.setItem('teacherTheme','dark');
+        darkToggle.checked = true;
+    }else{
+        document.body.classList.remove('dark');
+        localStorage.setItem('teacherTheme','light');
+        darkToggle.checked = false;
+    }
+}
+
+const savedTheme = localStorage.getItem('teacherTheme') || 'light';
+setTheme(savedTheme);
+
+darkToggle.addEventListener('change', function(){
+    setTheme(this.checked ? 'dark' : 'light');
+});
+</script>
+
+{% endblock %}

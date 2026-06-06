@@ -1,0 +1,510 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}Teacher Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Smart Teacher Control Center{% endblock %}
+
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+.t-dashboard{
+    display:grid;
+    gap:26px;
+    animation:dashIn .7s ease;
+}
+
+@keyframes dashIn{
+    from{opacity:0;transform:translateY(24px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+.t-hero{
+    position:relative;
+    overflow:hidden;
+    border-radius:36px;
+    padding:36px;
+    min-height:260px;
+    background:
+        radial-gradient(circle at 85% 20%,rgba(6,182,212,.40),transparent 30%),
+        radial-gradient(circle at 10% 90%,rgba(236,72,153,.34),transparent 34%),
+        linear-gradient(135deg,#111827,#2563eb,#7c3aed);
+    color:white;
+    box-shadow:0 30px 80px rgba(37,99,235,.25);
+}
+
+.t-hero::before{
+    content:"";
+    position:absolute;
+    width:340px;
+    height:340px;
+    border-radius:50%;
+    border:1px solid rgba(255,255,255,.18);
+    right:-120px;
+    bottom:-150px;
+    animation:spin 18s linear infinite;
+}
+
+.t-hero::after{
+    content:"";
+    position:absolute;
+    width:130px;
+    height:130px;
+    border-radius:36px;
+    background:rgba(255,255,255,.12);
+    right:120px;
+    top:36px;
+    transform:rotate(18deg);
+    animation:floatBox 4s infinite alternate ease-in-out;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg);}
+}
+
+@keyframes floatBox{
+    from{transform:translateY(0) rotate(18deg);}
+    to{transform:translateY(24px) rotate(28deg);}
+}
+
+.t-hero-content{
+    position:relative;
+    z-index:2;
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:26px;
+    align-items:center;
+}
+
+.teacher-info{
+    display:flex;
+    align-items:center;
+    gap:22px;
+}
+
+.teacher-photo{
+    width:106px;
+    height:106px;
+    border-radius:32px;
+    object-fit:cover;
+    border:4px solid rgba(255,255,255,.35);
+    box-shadow:0 22px 45px rgba(0,0,0,.25);
+}
+
+.teacher-info h1{
+    font-size:42px;
+    font-weight:950;
+    letter-spacing:-1.5px;
+}
+
+.teacher-info p{
+    margin-top:8px;
+    color:#dbeafe;
+    font-weight:750;
+}
+
+.hero-action{
+    display:grid;
+    gap:12px;
+}
+
+.hero-pill{
+    padding:14px 22px;
+    border-radius:999px;
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.22);
+    font-weight:950;
+    backdrop-filter:blur(10px);
+}
+
+.stat-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:20px;
+}
+
+.stat-card{
+    position:relative;
+    overflow:hidden;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:30px;
+    padding:26px;
+    box-shadow:0 20px 50px rgba(15,23,42,.08);
+    transition:.3s;
+}
+
+.stat-card:hover{
+    transform:translateY(-8px) scale(1.015);
+}
+
+.stat-card::after{
+    content:"";
+    position:absolute;
+    width:130px;
+    height:130px;
+    border-radius:50%;
+    right:-45px;
+    top:-45px;
+    background:var(--stat-glow);
+    opacity:.18;
+}
+
+.stat-icon{
+    width:58px;
+    height:58px;
+    border-radius:20px;
+    display:grid;
+    place-items:center;
+    color:white;
+    font-size:25px;
+    background:var(--stat-bg);
+    box-shadow:0 16px 35px var(--stat-shadow);
+    margin-bottom:18px;
+}
+
+.stat-card h4{
+    color:var(--muted);
+    font-size:12px;
+    font-weight:950;
+    text-transform:uppercase;
+}
+
+.stat-card h2{
+    color:var(--text);
+    font-size:44px;
+    font-weight:950;
+    margin-top:8px;
+}
+
+.s1{--stat-bg:linear-gradient(135deg,#2563eb,#06b6d4);--stat-glow:#2563eb;--stat-shadow:rgba(37,99,235,.25);}
+.s2{--stat-bg:linear-gradient(135deg,#7c3aed,#e040fb);--stat-glow:#7c3aed;--stat-shadow:rgba(124,58,237,.25);}
+.s3{--stat-bg:linear-gradient(135deg,#f59e0b,#ef4444);--stat-glow:#f59e0b;--stat-shadow:rgba(245,158,11,.25);}
+.s4{--stat-bg:linear-gradient(135deg,#22c55e,#14b8a6);--stat-glow:#22c55e;--stat-shadow:rgba(34,197,94,.25);}
+
+.content-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:24px;
+}
+
+.panel{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:32px;
+    padding:28px;
+    box-shadow:0 20px 50px rgba(15,23,42,.08);
+}
+
+.panel-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:20px;
+}
+
+.panel h3{
+    color:var(--text);
+    font-size:23px;
+    font-weight:950;
+}
+
+.tag-cloud{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.tag{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 16px;
+    border-radius:999px;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    color:var(--text);
+    font-weight:900;
+    transition:.25s;
+}
+
+.tag:hover{
+    transform:translateY(-4px);
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    color:white;
+}
+
+.chart-box{
+    height:330px;
+}
+
+.activity-list{
+    display:grid;
+    gap:14px;
+}
+
+.activity-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    padding:14px;
+    border-radius:22px;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    transition:.25s;
+}
+
+.activity-item:hover{
+    transform:translateX(6px);
+}
+
+.student-info{
+    display:flex;
+    align-items:center;
+    gap:13px;
+}
+
+.student-avatar{
+    width:52px;
+    height:52px;
+    border-radius:18px;
+    object-fit:cover;
+}
+
+.student-info strong{
+    color:var(--text);
+}
+
+.student-info small{
+    color:var(--muted);
+    font-weight:750;
+}
+
+.status{
+    padding:8px 14px;
+    border-radius:999px;
+    color:white;
+    font-size:12px;
+    font-weight:950;
+}
+
+.present{background:#22c55e;}
+.absent{background:#ef4444;}
+.late{background:#f59e0b;}
+
+.empty{
+    color:var(--muted);
+    font-weight:850;
+    text-align:center;
+    padding:35px;
+}
+
+@media(max-width:1150px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .content-grid{grid-template-columns:1fr;}
+}
+
+@media(max-width:700px){
+    .stat-grid{grid-template-columns:1fr;}
+    .t-hero-content{grid-template-columns:1fr;}
+    .teacher-info{flex-direction:column;align-items:flex-start;}
+    .teacher-info h1{font-size:32px;}
+}
+</style>
+
+<div class="t-dashboard">
+
+    <section class="t-hero">
+        <div class="t-hero-content">
+
+            <div class="teacher-info">
+                {% if teacher.profile_photo %}
+                    <img src="{{ teacher.profile_photo.url }}" class="teacher-photo">
+                {% else %}
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="teacher-photo">
+                {% endif %}
+
+                <div>
+                    <h1>{{ teacher.name }}</h1>
+                    <p>Welcome back. Control attendance, analytics, classes, and reports from here.</p>
+                    <p>📞 {{ teacher.phone }}</p>
+                </div>
+            </div>
+
+            <div class="hero-action">
+                <div class="hero-pill">👩‍🏫 Teacher Panel</div>
+                <div class="hero-pill">⚡ Smart Attendance</div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="stat-grid">
+        <div class="stat-card s1">
+            <div class="stat-icon">👥</div>
+            <h4>Total Students</h4>
+            <h2>{{ total_students }}</h2>
+        </div>
+
+        <div class="stat-card s2">
+            <div class="stat-icon">🏫</div>
+            <h4>Assigned Classes</h4>
+            <h2>{{ total_classes }}</h2>
+        </div>
+
+        <div class="stat-card s3">
+            <div class="stat-icon">📚</div>
+            <h4>Assigned Subjects</h4>
+            <h2>{{ total_subjects }}</h2>
+        </div>
+
+        <div class="stat-card s4">
+            <div class="stat-icon">✅</div>
+            <h4>Today Attendance</h4>
+            <h2>{{ today_attendance }}</h2>
+        </div>
+    </section>
+
+    <section class="content-grid">
+
+        <div class="panel">
+            <div class="panel-head">
+                <h3>Weekly Attendance Activity</h3>
+                <span class="tag">📊 Live Chart</span>
+            </div>
+
+            <div class="chart-box">
+                <canvas id="attendanceChart"></canvas>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Recent Activity</h3>
+
+            <div class="activity-list">
+                {% for attendance in recent_attendance %}
+                    <div class="activity-item">
+                        <div class="student-info">
+                            {% if attendance.student.profile_photo %}
+                                <img src="{{ attendance.student.profile_photo.url }}" class="student-avatar">
+                            {% else %}
+                                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="student-avatar">
+                            {% endif %}
+
+                            <div>
+                                <strong>{{ attendance.student.user.first_name }}</strong><br>
+                                <small>
+                                    {% if attendance.subject %}
+                                        {{ attendance.subject.name }}
+                                    {% else %}
+                                        No Subject
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+
+                        <span class="status {% if attendance.status == 'Present' %}present{% elif attendance.status == 'Absent' %}absent{% else %}late{% endif %}">
+                            {{ attendance.status }}
+                        </span>
+                    </div>
+                {% empty %}
+                    <div class="empty">No attendance records</div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </section>
+
+    <section class="content-grid">
+
+        <div class="panel">
+            <h3>Departments</h3>
+            <div class="tag-cloud">
+                {% for department in departments %}
+                    <span class="tag">🏛️ {{ department.name }}</span>
+                {% empty %}
+                    <div class="empty">No departments assigned</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Classes</h3>
+            <div class="tag-cloud">
+                {% for class in classes %}
+                    <span class="tag">🎓 {{ class.name }}</span>
+                {% empty %}
+                    <div class="empty">No classes assigned</div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </section>
+
+    <section class="panel">
+        <h3>Subjects</h3>
+        <div class="tag-cloud">
+            {% for subject in subjects %}
+                <span class="tag">📘 {{ subject.name }}</span>
+            {% empty %}
+                <div class="empty">No subjects assigned</div>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+<script>
+const isDark = document.body.classList.contains("dark");
+const textColor = isDark ? "#ffffff" : "#0f172a";
+const gridColor = isDark ? "rgba(148,163,184,.18)" : "rgba(15,23,42,.08)";
+
+new Chart(document.getElementById("attendanceChart"), {
+    type:"line",
+    data:{
+        labels:{{ chart_labels|safe }},
+        datasets:[{
+            label:"Attendance",
+            data:{{ chart_data|safe }},
+            tension:.45,
+            fill:true,
+            borderWidth:4,
+            backgroundColor:"rgba(37,99,235,.18)",
+            borderColor:"#2563eb",
+            pointBackgroundColor:"#7c3aed",
+            pointRadius:6
+        }]
+    },
+    options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        animation:{
+            duration:1500,
+            easing:"easeOutQuart"
+        },
+        plugins:{
+            legend:{
+                labels:{
+                    color:textColor,
+                    font:{weight:"bold"}
+                }
+            }
+        },
+        scales:{
+            x:{
+                ticks:{color:textColor},
+                grid:{color:gridColor}
+            },
+            y:{
+                beginAtZero:true,
+                ticks:{color:textColor},
+                grid:{color:gridColor}
+            }
+        }
+    }
+});
+</script>
+
+{% endblock %}

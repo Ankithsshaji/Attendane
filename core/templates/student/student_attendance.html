@@ -1,0 +1,905 @@
+{% extends "student/base.html" %}
+
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance{% endblock %}
+{% block page_subtitle %}Animated Attendance Dashboard{% endblock %}
+
+{% block content %}
+
+<style>
+
+.att-wrap{
+    width:100%;
+    animation:fadePage .7s ease;
+}
+
+@keyframes fadePage{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* HERO */
+
+.att-hero{
+    display:grid;
+    grid-template-columns:1.4fr .7fr;
+    gap:24px;
+    margin-bottom:24px;
+}
+
+.hero-card{
+    position:relative;
+    overflow:hidden;
+
+    border-radius:34px;
+
+    padding:34px;
+
+    background:
+        radial-gradient(circle at top right,
+        rgba(224,64,251,.35),
+        transparent 35%),
+
+        linear-gradient(
+            135deg,
+            rgba(108,62,255,.24),
+            rgba(0,198,255,.12)
+        );
+
+    border:1px solid var(--border);
+}
+
+.hero-card::before{
+    content:"";
+
+    position:absolute;
+
+    width:200px;
+    height:200px;
+
+    border-radius:50%;
+
+    background:
+        rgba(108,62,255,.25);
+
+    filter:blur(18px);
+
+    left:-60px;
+    bottom:-60px;
+
+    animation:floatGlow 6s infinite alternate ease-in-out;
+}
+
+@keyframes floatGlow{
+    from{
+        transform:translateY(0);
+    }
+    to{
+        transform:translateY(-25px);
+    }
+}
+
+.hero-small{
+    position:relative;
+    z-index:2;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+}
+
+.hero-title{
+    position:relative;
+    z-index:2;
+
+    margin-top:10px;
+
+    font-size:46px;
+
+    font-weight:900;
+
+    line-height:1.05;
+
+    letter-spacing:-1.5px;
+
+    color:var(--text);
+}
+
+.hero-desc{
+    position:relative;
+    z-index:2;
+
+    margin-top:16px;
+
+    color:var(--muted);
+
+    font-size:15px;
+
+    font-weight:650;
+
+    max-width:560px;
+}
+
+/* TOTAL CARD */
+
+.total-card{
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+    border-radius:34px;
+
+    padding:28px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    transition:.35s;
+}
+
+.total-card:hover{
+    transform:translateY(-8px);
+
+    box-shadow:
+        0 20px 45px rgba(108,62,255,.14);
+}
+
+.total-icon{
+    width:58px;
+    height:58px;
+
+    border-radius:20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6c3eff,
+            #00c6ff
+        );
+
+    display:grid;
+    place-items:center;
+
+    color:white;
+
+    font-size:26px;
+
+    margin-bottom:18px;
+}
+
+.total-label{
+    color:var(--muted);
+
+    font-size:13px;
+
+    font-weight:900;
+
+    text-transform:uppercase;
+}
+
+.total-num{
+    font-size:54px;
+
+    font-weight:950;
+
+    color:var(--text);
+
+    margin-top:8px;
+}
+
+.total-note{
+    color:var(--muted);
+
+    font-size:13px;
+
+    font-weight:650;
+}
+
+/* FILTER */
+
+.filter-card{
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+    border-radius:30px;
+
+    padding:24px;
+
+    margin-bottom:24px;
+
+    box-shadow:
+        0 18px 40px rgba(15,23,42,.06);
+}
+
+.filter-head{
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:22px;
+}
+
+.filter-title{
+    font-size:22px;
+
+    font-weight:900;
+
+    color:var(--text);
+}
+
+.filter-sub{
+    font-size:13px;
+
+    color:var(--muted);
+
+    font-weight:650;
+
+    margin-top:4px;
+}
+
+.filter-form{
+    display:grid;
+
+    grid-template-columns:
+        1.1fr
+        1fr
+        1fr
+        auto;
+
+    gap:16px;
+
+    align-items:end;
+}
+
+.filter-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.filter-group label{
+    font-size:12px;
+
+    font-weight:900;
+
+    color:var(--muted);
+
+    text-transform:uppercase;
+
+    letter-spacing:.7px;
+}
+
+.filter-group select,
+.filter-group input{
+
+    height:54px;
+
+    border-radius:18px;
+
+    border:1px solid var(--border);
+
+    background:var(--surface2);
+
+    color:var(--text);
+
+    padding:0 16px;
+
+    outline:none;
+
+    transition:.3s;
+}
+
+.filter-group select:focus,
+.filter-group input:focus{
+
+    border-color:#6c3eff;
+
+    box-shadow:
+        0 0 0 4px rgba(108,62,255,.12);
+}
+
+/* BUTTONS */
+
+.filter-actions{
+    display:flex;
+    gap:12px;
+}
+
+.btn{
+    height:54px;
+
+    padding:0 24px;
+
+    border:none;
+
+    border-radius:18px;
+
+    cursor:pointer;
+
+    font-size:14px;
+
+    font-weight:800;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    transition:.3s;
+}
+
+.btn-primary{
+    background:
+        linear-gradient(
+            135deg,
+            #6c3eff,
+            #2563eb
+        );
+
+    color:white;
+}
+
+.btn-primary:hover{
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 14px 30px rgba(108,62,255,.3);
+}
+
+.btn-soft{
+    background:var(--surface2);
+
+    color:var(--text);
+
+    border:1px solid var(--border);
+}
+
+.btn-soft:hover{
+    transform:translateY(-4px);
+}
+
+/* TABLE */
+
+.table-shell{
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+    border-radius:30px;
+
+    overflow:hidden;
+}
+
+.table-top{
+    padding:24px;
+
+    border-bottom:1px solid var(--border);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+}
+
+.table-title{
+    font-size:22px;
+
+    font-weight:900;
+
+    color:var(--text);
+}
+
+.table-sub{
+    color:var(--muted);
+
+    font-size:13px;
+
+    font-weight:650;
+
+    margin-top:4px;
+}
+
+.att-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.att-table thead tr{
+    background:
+        linear-gradient(
+            135deg,
+            #6c3eff,
+            #2563eb
+        );
+}
+
+.att-table th{
+    padding:18px 22px;
+
+    color:white;
+
+    text-align:left;
+
+    font-size:12px;
+
+    font-weight:900;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+}
+
+.att-table td{
+    padding:18px 22px;
+
+    border-bottom:1px solid var(--border);
+
+    color:var(--text);
+
+    font-size:14px;
+
+    font-weight:700;
+}
+
+.att-table tbody tr{
+    transition:.3s;
+}
+
+.att-table tbody tr:hover td{
+    background:var(--surface2);
+}
+
+/* DATE */
+
+.date-cell{
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+}
+
+.date-icon{
+    width:44px;
+    height:44px;
+
+    border-radius:16px;
+
+    background:var(--surface2);
+
+    display:grid;
+
+    place-items:center;
+
+    transition:.3s;
+}
+
+.att-table tbody tr:hover .date-icon{
+
+    transform:rotate(-8deg) scale(1.08);
+
+    background:
+        linear-gradient(
+            135deg,
+            #6c3eff,
+            #00c6ff
+        );
+
+    color:white;
+}
+
+/* SUBJECT */
+
+.subject-pill{
+    display:inline-flex;
+
+    padding:9px 16px;
+
+    border-radius:999px;
+
+    background:var(--surface2);
+
+    color:var(--text);
+
+    font-weight:850;
+}
+
+/* STATUS */
+
+.status-badge{
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    min-width:105px;
+
+    padding:10px 16px;
+
+    border-radius:999px;
+
+    color:white;
+
+    font-size:13px;
+
+    font-weight:900;
+
+    transition:.3s;
+}
+
+.status-badge:hover{
+    transform:scale(1.08);
+}
+
+.present{
+    background:
+        linear-gradient(
+            135deg,
+            #22c55e,
+            #16a34a
+        );
+
+    box-shadow:
+        0 10px 22px rgba(34,197,94,.22);
+}
+
+.absent{
+    background:
+        linear-gradient(
+            135deg,
+            #ef4444,
+            #dc2626
+        );
+
+    box-shadow:
+        0 10px 22px rgba(239,68,68,.22);
+}
+
+.late{
+    background:
+        linear-gradient(
+            135deg,
+            #f59e0b,
+            #d97706
+        );
+
+    box-shadow:
+        0 10px 22px rgba(245,158,11,.22);
+}
+
+.empty-row{
+    text-align:center;
+
+    padding:48px !important;
+
+    color:var(--muted) !important;
+
+    font-weight:800 !important;
+}
+
+/* MOBILE */
+
+@media(max-width:1000px){
+
+    .att-hero{
+        grid-template-columns:1fr;
+    }
+
+    .filter-form{
+        grid-template-columns:1fr;
+    }
+
+    .filter-actions{
+        flex-direction:column;
+    }
+
+    .table-shell{
+        overflow-x:auto;
+    }
+
+    .att-table{
+        min-width:760px;
+    }
+
+    .hero-title{
+        font-size:34px;
+    }
+
+}
+
+</style>
+
+<div class="att-wrap">
+
+    <!-- HERO -->
+
+    <section class="att-hero">
+
+        <div class="hero-card">
+
+            <div class="hero-small">
+                Student Attendance Panel
+            </div>
+
+            <h1 class="hero-title">
+                Attendance Records
+            </h1>
+
+            <p class="hero-desc">
+
+                View your daily attendance,
+                subject activity,
+                and attendance history
+                in a modern animated dashboard.
+
+            </p>
+
+        </div>
+
+        <div class="total-card">
+
+            <div class="total-icon">
+                📊
+            </div>
+
+            <div class="total-label">
+                Total Records
+            </div>
+
+            <div class="total-num">
+                {{ attendance|length }}
+            </div>
+
+            <div class="total-note">
+                Based on filter results
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- FILTER -->
+
+    <section class="filter-card">
+
+        <div class="filter-head">
+
+            <div>
+
+                <div class="filter-title">
+                    Filter Attendance
+                </div>
+
+                <div class="filter-sub">
+                    Filter by status and date
+                </div>
+
+            </div>
+
+        </div>
+
+        <form method="GET" class="filter-form">
+
+            <div class="filter-group">
+
+                <label>Status</label>
+
+                <select name="status">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="Present"
+                        {% if status == 'Present' %}
+                            selected
+                        {% endif %}
+                    >
+                        Present
+                    </option>
+
+                    <option value="Absent"
+                        {% if status == 'Absent' %}
+                            selected
+                        {% endif %}
+                    >
+                        Absent
+                    </option>
+
+                    <option value="Late"
+                        {% if status == 'Late' %}
+                            selected
+                        {% endif %}
+                    >
+                        Late
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="filter-group">
+
+                <label>Start Date</label>
+
+                <input
+                    type="date"
+                    name="start"
+                    value="{{ start }}"
+                >
+
+            </div>
+
+            <div class="filter-group">
+
+                <label>End Date</label>
+
+                <input
+                    type="date"
+                    name="end"
+                    value="{{ end }}"
+                >
+
+            </div>
+
+            <div class="filter-actions">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                >
+                    Apply
+                </button>
+
+                <a
+                    href="/attendance/"
+                    class="btn btn-soft"
+                >
+                    Reset
+                </a>
+
+            </div>
+
+        </form>
+
+    </section>
+
+    <!-- TABLE -->
+
+    <section class="table-shell">
+
+        <div class="table-top">
+
+            <div>
+
+                <div class="table-title">
+                    Attendance Timeline
+                </div>
+
+                <div class="table-sub">
+                    Latest attendance records
+                </div>
+
+            </div>
+
+        </div>
+
+        <table class="att-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>Date</th>
+                    <th>Subject</th>
+                    <th>Time</th>
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for a in attendance %}
+
+                <tr>
+
+                    <td>
+
+                        <div class="date-cell">
+
+                            <div class="date-icon">
+                                📅
+                            </div>
+
+                            {{ a.timestamp|date:"d M Y" }}
+
+                        </div>
+
+                    </td>
+
+                    <td>
+
+                        <span class="subject-pill">
+                            {{ a.subject.name }}
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        {{ a.timestamp|time:"H:i" }}
+
+                    </td>
+
+                    <td>
+
+                        {% if a.status == "Present" %}
+
+                            <span class="status-badge present">
+                                Present
+                            </span>
+
+                        {% elif a.status == "Absent" %}
+
+                            <span class="status-badge absent">
+                                Absent
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge late">
+                                Late
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="4" class="empty-row">
+
+                        No attendance records found
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+</div>
+
+{% endblock %}

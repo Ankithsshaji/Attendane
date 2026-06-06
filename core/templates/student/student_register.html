@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Registration</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            min-height:100vh;
+            font-family:'Plus Jakarta Sans', sans-serif;
+            background:#050816;
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            padding:24px;
+        }
+
+        body::before{
+            content:"";
+            position:fixed;
+            width:520px;
+            height:520px;
+            border-radius:50%;
+            background:linear-gradient(135deg,#6c3eff,#e040fb);
+            filter:blur(100px);
+            opacity:.45;
+            top:-180px;
+            left:-160px;
+            animation:glowOne 7s infinite alternate ease-in-out;
+        }
+
+        body::after{
+            content:"";
+            position:fixed;
+            width:520px;
+            height:520px;
+            border-radius:50%;
+            background:linear-gradient(135deg,#00c6ff,#2563eb);
+            filter:blur(100px);
+            opacity:.35;
+            right:-180px;
+            bottom:-180px;
+            animation:glowTwo 8s infinite alternate ease-in-out;
+        }
+
+        @keyframes glowOne{
+            from{transform:translate(0,0) scale(1);}
+            to{transform:translate(80px,50px) scale(1.14);}
+        }
+
+        @keyframes glowTwo{
+            from{transform:translate(0,0) scale(1);}
+            to{transform:translate(-70px,-50px) scale(1.12);}
+        }
+
+        .register-shell{
+            position:relative;
+            z-index:2;
+            width:100%;
+            max-width:1080px;
+            min-height:650px;
+            display:grid;
+            grid-template-columns:.9fr 1.1fr;
+            border-radius:36px;
+            overflow:hidden;
+            background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.14);
+            backdrop-filter:blur(24px);
+            box-shadow:0 35px 90px rgba(0,0,0,.45);
+            animation:pageIn .75s ease;
+        }
+
+        @keyframes pageIn{
+            from{opacity:0; transform:translateY(30px) scale(.96);}
+            to{opacity:1; transform:translateY(0) scale(1);}
+        }
+
+        .left-panel{
+            position:relative;
+            overflow:hidden;
+            padding:46px;
+            background:
+                radial-gradient(circle at top left,rgba(108,62,255,.42),transparent 32%),
+                linear-gradient(135deg,rgba(108,62,255,.24),rgba(0,198,255,.08));
+        }
+
+        .left-panel::before{
+            content:"";
+            position:absolute;
+            width:240px;
+            height:240px;
+            border-radius:50%;
+            border:1px solid rgba(255,255,255,.16);
+            right:-80px;
+            bottom:-70px;
+            animation:spin 18s linear infinite;
+        }
+
+        .left-panel::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:linear-gradient(120deg,transparent,rgba(255,255,255,.10),transparent);
+            transform:translateX(-100%);
+            animation:shine 5s infinite;
+        }
+
+        @keyframes spin{
+            to{transform:rotate(360deg);}
+        }
+
+        @keyframes shine{
+            0%{transform:translateX(-100%);}
+            45%,100%{transform:translateX(100%);}
+        }
+
+        .brand{
+            position:relative;
+            z-index:2;
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin-bottom:90px;
+        }
+
+        .brand-icon{
+            width:50px;
+            height:50px;
+            border-radius:17px;
+            background:linear-gradient(135deg,#6c3eff,#e040fb);
+            display:grid;
+            place-items:center;
+            font-weight:900;
+            box-shadow:0 14px 30px rgba(108,62,255,.35);
+        }
+
+        .brand-name{
+            font-size:25px;
+            font-weight:900;
+        }
+
+        .left-title{
+            position:relative;
+            z-index:2;
+            font-size:50px;
+            line-height:1.04;
+            font-weight:950;
+            letter-spacing:-1.8px;
+            margin-bottom:18px;
+        }
+
+        .left-text{
+            position:relative;
+            z-index:2;
+            color:#cbd5e1;
+            font-size:15px;
+            line-height:1.8;
+            font-weight:650;
+            max-width:420px;
+        }
+
+        .features{
+            position:relative;
+            z-index:2;
+            margin-top:40px;
+            display:grid;
+            gap:14px;
+        }
+
+        .feature{
+            display:flex;
+            align-items:center;
+            gap:13px;
+            padding:14px;
+            border-radius:20px;
+            background:rgba(255,255,255,.10);
+            border:1px solid rgba(255,255,255,.12);
+            color:#e2e8f0;
+            font-size:14px;
+            font-weight:800;
+            animation:featureIn .55s ease both;
+        }
+
+        .feature:nth-child(1){animation-delay:.1s;}
+        .feature:nth-child(2){animation-delay:.2s;}
+        .feature:nth-child(3){animation-delay:.3s;}
+
+        @keyframes featureIn{
+            from{opacity:0; transform:translateX(-22px);}
+            to{opacity:1; transform:translateX(0);}
+        }
+
+        .feature span{
+            width:38px;
+            height:38px;
+            border-radius:14px;
+            background:linear-gradient(135deg,#6c3eff,#00c6ff);
+            display:grid;
+            place-items:center;
+            flex-shrink:0;
+        }
+
+        .right-panel{
+            padding:42px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .form-card{
+            width:100%;
+            max-width:520px;
+        }
+
+        .form-head{
+            text-align:center;
+            margin-bottom:28px;
+        }
+
+        .form-logo{
+            width:76px;
+            height:76px;
+            margin:0 auto 18px;
+            border-radius:26px;
+            background:linear-gradient(135deg,#6c3eff,#00c6ff);
+            display:grid;
+            place-items:center;
+            font-size:34px;
+            box-shadow:0 20px 42px rgba(0,198,255,.22);
+            animation:pulse 2.5s infinite;
+        }
+
+        @keyframes pulse{
+            0%,100%{transform:scale(1);}
+            50%{transform:scale(1.06);}
+        }
+
+        h2{
+            font-size:32px;
+            font-weight:950;
+            margin-bottom:8px;
+        }
+
+        .subtitle{
+            color:#94a3b8;
+            font-size:14px;
+            font-weight:650;
+        }
+
+        .error{
+            background:rgba(239,68,68,.14);
+            color:#fca5a5;
+            border:1px solid rgba(239,68,68,.35);
+            padding:13px;
+            border-radius:17px;
+            text-align:center;
+            margin-bottom:18px;
+            font-size:14px;
+            font-weight:800;
+            animation:errorIn .45s ease;
+        }
+
+        @keyframes errorIn{
+            from{opacity:0; transform:translateY(-10px);}
+            to{opacity:1; transform:translateY(0);}
+        }
+
+        .form-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:16px;
+        }
+
+        .input-group{
+            animation:fieldIn .55s ease both;
+        }
+
+        .input-group:nth-child(1){animation-delay:.05s;}
+        .input-group:nth-child(2){animation-delay:.1s;}
+        .input-group:nth-child(3){animation-delay:.15s;}
+        .input-group:nth-child(4){animation-delay:.2s;}
+        .input-group:nth-child(5){animation-delay:.25s;}
+        .input-group:nth-child(6){animation-delay:.3s;}
+
+        @keyframes fieldIn{
+            from{opacity:0; transform:translateY(18px);}
+            to{opacity:1; transform:translateY(0);}
+        }
+
+        .full{
+            grid-column:span 2;
+        }
+
+        label{
+            display:block;
+            color:#cbd5e1;
+            font-size:12px;
+            font-weight:900;
+            text-transform:uppercase;
+            letter-spacing:.8px;
+            margin-bottom:9px;
+        }
+
+        input,
+        select{
+            width:100%;
+            height:56px;
+            border:none;
+            outline:none;
+            border-radius:18px;
+            background:rgba(255,255,255,.10);
+            border:1px solid rgba(255,255,255,.13);
+            color:white;
+            padding:0 16px;
+            font-size:14px;
+            font-weight:750;
+            transition:.3s;
+        }
+
+        input::placeholder{
+            color:#94a3b8;
+        }
+
+        select option{
+            background:#0f172a;
+            color:white;
+        }
+
+        input:focus,
+        select:focus{
+            border-color:#6c3eff;
+            box-shadow:0 0 0 4px rgba(108,62,255,.18);
+            background:rgba(255,255,255,.14);
+            transform:translateY(-2px);
+        }
+
+        .password-wrap{
+            position:relative;
+        }
+
+        .password-wrap input{
+            padding-right:58px;
+        }
+
+        .toggle-pass{
+            position:absolute;
+            top:50%;
+            right:15px;
+            transform:translateY(-50%);
+            font-size:12px;
+            font-weight:950;
+            color:#38bdf8;
+            cursor:pointer;
+            user-select:none;
+        }
+
+        .register-btn{
+            position:relative;
+            overflow:hidden;
+            width:100%;
+            height:58px;
+            border:none;
+            border-radius:20px;
+            background:linear-gradient(135deg,#6c3eff,#2563eb);
+            color:white;
+            font-size:15px;
+            font-weight:950;
+            cursor:pointer;
+            transition:.35s;
+            margin-top:18px;
+        }
+
+        .register-btn::before{
+            content:"";
+            position:absolute;
+            top:0;
+            left:-100%;
+            width:100%;
+            height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+            transition:.75s;
+        }
+
+        .register-btn:hover::before{
+            left:100%;
+        }
+
+        .register-btn:hover{
+            transform:translateY(-5px);
+            box-shadow:0 18px 38px rgba(37,99,235,.35);
+        }
+
+        .bottom-text{
+            margin-top:22px;
+            text-align:center;
+            color:#94a3b8;
+            font-size:14px;
+            font-weight:650;
+        }
+
+        .bottom-text a{
+            color:#38bdf8;
+            text-decoration:none;
+            font-weight:950;
+        }
+
+        .bottom-text a:hover{
+            text-decoration:underline;
+        }
+
+        @media(max-width:960px){
+            body{
+                overflow:auto;
+            }
+
+            .register-shell{
+                grid-template-columns:1fr;
+                max-width:560px;
+            }
+
+            .left-panel{
+                display:none;
+            }
+        }
+
+        @media(max-width:560px){
+            body{
+                padding:12px;
+            }
+
+            .right-panel{
+                padding:28px 20px;
+            }
+
+            .form-grid{
+                grid-template-columns:1fr;
+            }
+
+            .full{
+                grid-column:span 1;
+            }
+
+            h2{
+                font-size:27px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="register-shell">
+
+    <section class="left-panel">
+        <div class="brand">
+            <div class="brand-icon">AX</div>
+            <div class="brand-name">AttendX</div>
+        </div>
+
+        <h1 class="left-title">
+            Create Your Student Account
+        </h1>
+
+        <p class="left-text">
+            Register once and access attendance records, face recognition login, reports, and student profile management.
+        </p>
+
+        <div class="features">
+            <div class="feature"><span>🎓</span> Smart student dashboard</div>
+            <div class="feature"><span>📸</span> Face recognition attendance</div>
+            <div class="feature"><span>📊</span> Attendance history and reports</div>
+        </div>
+    </section>
+
+    <section class="right-panel">
+
+        <div class="form-card">
+
+            <div class="form-head">
+                <div class="form-logo">🎓</div>
+                <h2>Student Registration</h2>
+                <p class="subtitle">Create account to continue</p>
+            </div>
+
+            {% if error %}
+                <div class="error">
+                    {{ error }}
+                </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="form-grid">
+
+                    <div class="input-group full">
+                        <label>Full Name</label>
+                        <input type="text" name="name" placeholder="Enter full name" required>
+                    </div>
+
+                    <div class="input-group full">
+                        <label>Register Number</label>
+                        <input type="text" name="register_number" placeholder="Enter register number" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Department</label>
+                        <select id="department" name="department" required>
+                            <option value="">Select Department</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept.id }}">
+                                    {{ dept.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Class</label>
+                        <select id="class_name" name="class_name" required>
+                            <option value="">Select Class</option>
+                            {% for cls in classes %}
+                                <option value="{{ cls.id }}" data-dept="{{ cls.department.id }}">
+                                    {{ cls.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Password</label>
+                        <div class="password-wrap">
+                            <input type="password" id="password" name="password" placeholder="Create password" required>
+                            <span class="toggle-pass" onclick="togglePassword('password', this)">SHOW</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Confirm</label>
+                        <div class="password-wrap">
+                            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm password" required>
+                            <span class="toggle-pass" onclick="togglePassword('confirm_password', this)">SHOW</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="register-btn">
+                    Create Student Account
+                </button>
+            </form>
+
+            <div class="bottom-text">
+                Already have an account?
+                <a href="/">Login</a>
+            </div>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+function filterClasses(){
+    const deptId = document.getElementById("department").value;
+    const classDropdown = document.getElementById("class_name");
+
+    for(let i = 0; i < classDropdown.options.length; i++){
+        const option = classDropdown.options[i];
+
+        if(option.value === ""){
+            option.hidden = false;
+            continue;
+        }
+
+        option.hidden = option.dataset.dept !== deptId;
+    }
+
+    classDropdown.value = "";
+}
+
+function togglePassword(id, el){
+    const input = document.getElementById(id);
+
+    if(input.type === "password"){
+        input.type = "text";
+        el.innerHTML = "HIDE";
+    }else{
+        input.type = "password";
+        el.innerHTML = "SHOW";
+    }
+}
+
+document.getElementById("department").addEventListener("change", filterClasses);
+
+window.onload = function(){
+    filterClasses();
+};
+</script>
+
+</body>
+</html>

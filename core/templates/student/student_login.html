@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            min-height:100vh;
+            font-family:'Plus Jakarta Sans', sans-serif;
+            background:#050816;
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+        }
+
+        body::before{
+            content:"";
+            position:absolute;
+            width:520px;
+            height:520px;
+            background:linear-gradient(135deg,#6c3eff,#e040fb);
+            border-radius:50%;
+            filter:blur(90px);
+            opacity:.45;
+            top:-180px;
+            left:-140px;
+            animation:float1 7s infinite alternate ease-in-out;
+        }
+
+        body::after{
+            content:"";
+            position:absolute;
+            width:480px;
+            height:480px;
+            background:linear-gradient(135deg,#00c6ff,#2563eb);
+            border-radius:50%;
+            filter:blur(90px);
+            opacity:.38;
+            right:-160px;
+            bottom:-170px;
+            animation:float2 8s infinite alternate ease-in-out;
+        }
+
+        @keyframes float1{
+            from{transform:translate(0,0) scale(1);}
+            to{transform:translate(80px,60px) scale(1.15);}
+        }
+
+        @keyframes float2{
+            from{transform:translate(0,0) scale(1);}
+            to{transform:translate(-70px,-50px) scale(1.12);}
+        }
+
+        .login-wrapper{
+            position:relative;
+            z-index:2;
+            width:92%;
+            max-width:980px;
+            min-height:560px;
+            display:grid;
+            grid-template-columns:1.1fr .9fr;
+            background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.14);
+            border-radius:34px;
+            overflow:hidden;
+            backdrop-filter:blur(22px);
+            box-shadow:0 30px 80px rgba(0,0,0,.45);
+            animation:pageIn .7s ease;
+        }
+
+        @keyframes pageIn{
+            from{opacity:0; transform:translateY(30px) scale(.96);}
+            to{opacity:1; transform:translateY(0) scale(1);}
+        }
+
+        .left-panel{
+            padding:48px;
+            background:
+                radial-gradient(circle at top left,rgba(108,62,255,.45),transparent 35%),
+                linear-gradient(135deg,rgba(108,62,255,.25),rgba(0,198,255,.08));
+            position:relative;
+            overflow:hidden;
+        }
+
+        .left-panel::after{
+            content:"";
+            position:absolute;
+            width:240px;
+            height:240px;
+            border-radius:50%;
+            border:1px solid rgba(255,255,255,.16);
+            right:-70px;
+            bottom:-70px;
+            animation:spin 18s linear infinite;
+        }
+
+        @keyframes spin{
+            to{transform:rotate(360deg);}
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            margin-bottom:80px;
+        }
+
+        .brand-icon{
+            width:48px;
+            height:48px;
+            border-radius:16px;
+            background:linear-gradient(135deg,#6c3eff,#e040fb);
+            display:grid;
+            place-items:center;
+            font-weight:900;
+            box-shadow:0 12px 30px rgba(108,62,255,.35);
+        }
+
+        .brand-name{
+            font-size:24px;
+            font-weight:900;
+        }
+
+        .hero-title{
+            font-size:48px;
+            line-height:1.05;
+            font-weight:900;
+            letter-spacing:-1.5px;
+            margin-bottom:18px;
+        }
+
+        .hero-text{
+            color:#cbd5e1;
+            font-size:15px;
+            line-height:1.8;
+            max-width:420px;
+            font-weight:600;
+        }
+
+        .features{
+            margin-top:38px;
+            display:grid;
+            gap:14px;
+        }
+
+        .feature{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            color:#e2e8f0;
+            font-size:14px;
+            font-weight:700;
+        }
+
+        .feature span{
+            width:34px;
+            height:34px;
+            border-radius:12px;
+            background:rgba(255,255,255,.12);
+            display:grid;
+            place-items:center;
+        }
+
+        .right-panel{
+            padding:48px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .login-card{
+            width:100%;
+            max-width:380px;
+        }
+
+        .login-top{
+            text-align:center;
+            margin-bottom:28px;
+        }
+
+        .login-icon{
+            width:70px;
+            height:70px;
+            margin:0 auto 18px;
+            border-radius:24px;
+            background:linear-gradient(135deg,#6c3eff,#00c6ff);
+            display:grid;
+            place-items:center;
+            font-size:30px;
+            box-shadow:0 18px 40px rgba(0,198,255,.22);
+            animation:pulse 2.5s infinite;
+        }
+
+        @keyframes pulse{
+            0%,100%{transform:scale(1);}
+            50%{transform:scale(1.06);}
+        }
+
+        h2{
+            font-size:30px;
+            font-weight:900;
+            margin-bottom:8px;
+        }
+
+        .subtitle{
+            color:#94a3b8;
+            font-size:14px;
+            font-weight:600;
+        }
+
+        .error{
+            background:rgba(239,68,68,.14);
+            color:#fca5a5;
+            border:1px solid rgba(239,68,68,.35);
+            padding:12px;
+            border-radius:16px;
+            text-align:center;
+            margin-bottom:16px;
+            font-size:14px;
+            font-weight:700;
+        }
+
+        .input-group{
+            position:relative;
+            margin-bottom:16px;
+        }
+
+        .input-group input{
+            width:100%;
+            height:56px;
+            border:none;
+            outline:none;
+            border-radius:18px;
+            background:rgba(255,255,255,.10);
+            border:1px solid rgba(255,255,255,.12);
+            color:white;
+            padding:0 48px 0 18px;
+            font-size:14px;
+            font-weight:700;
+            transition:.3s;
+        }
+
+        .input-group input::placeholder{
+            color:#94a3b8;
+        }
+
+        .input-group input:focus{
+            border-color:#6c3eff;
+            box-shadow:0 0 0 4px rgba(108,62,255,.18);
+            background:rgba(255,255,255,.14);
+        }
+
+        .input-icon{
+            position:absolute;
+            right:18px;
+            top:50%;
+            transform:translateY(-50%);
+            color:#94a3b8;
+            font-size:16px;
+        }
+
+        .toggle-password{
+            position:absolute;
+            right:16px;
+            top:50%;
+            transform:translateY(-50%);
+            cursor:pointer;
+            color:#38bdf8;
+            font-size:12px;
+            font-weight:900;
+            user-select:none;
+        }
+
+        .login-btn{
+            width:100%;
+            height:56px;
+            border:none;
+            border-radius:18px;
+            background:linear-gradient(135deg,#6c3eff,#2563eb);
+            color:white;
+            font-size:15px;
+            font-weight:900;
+            cursor:pointer;
+            transition:.3s;
+            position:relative;
+            overflow:hidden;
+            margin-top:4px;
+        }
+
+        .login-btn::before{
+            content:"";
+            position:absolute;
+            top:0;
+            left:-100%;
+            width:100%;
+            height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+            transition:.7s;
+        }
+
+        .login-btn:hover::before{
+            left:100%;
+        }
+
+        .login-btn:hover{
+            transform:translateY(-4px);
+            box-shadow:0 18px 35px rgba(37,99,235,.35);
+        }
+
+        .links{
+            text-align:center;
+            margin-top:22px;
+            color:#94a3b8;
+            font-size:14px;
+            font-weight:650;
+        }
+
+        .links a{
+            color:#38bdf8;
+            font-weight:900;
+            text-decoration:none;
+        }
+
+        .links a:hover{
+            text-decoration:underline;
+        }
+
+        .switch{
+            margin-top:16px;
+            height:54px;
+            border-radius:18px;
+            background:rgba(255,255,255,.10);
+            border:1px solid rgba(255,255,255,.14);
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            text-decoration:none;
+            font-weight:900;
+            transition:.3s;
+        }
+
+        .switch:hover{
+            background:linear-gradient(135deg,#e040fb,#6c3eff);
+            transform:translateY(-4px);
+            box-shadow:0 18px 35px rgba(224,64,251,.25);
+        }
+
+        @media(max-width:850px){
+            .login-wrapper{
+                grid-template-columns:1fr;
+                max-width:460px;
+            }
+
+            .left-panel{
+                display:none;
+            }
+
+            .right-panel{
+                padding:34px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-wrapper">
+
+    <div class="left-panel">
+        <div class="brand">
+            <div class="brand-icon">AX</div>
+            <div class="brand-name">AttendX</div>
+        </div>
+
+        <h1 class="hero-title">
+            Smart Student Attendance Portal
+        </h1>
+
+        <p class="hero-text">
+            Login to view your attendance records, class details, reports, and academic activity in one secure dashboard.
+        </p>
+
+        <div class="features">
+            <div class="feature"><span>📊</span> Real-time attendance tracking</div>
+            <div class="feature"><span>🎓</span> Student profile management</div>
+            <div class="feature"><span>🔐</span> Secure student login</div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="login-card">
+
+            <div class="login-top">
+                <div class="login-icon">🎓</div>
+                <h2>Student Login</h2>
+                <p class="subtitle">Enter your details to continue</p>
+            </div>
+
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <input type="text" name="register_number" placeholder="Register Number" required>
+                    <span class="input-icon">🆔</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <span class="toggle-password" onclick="togglePassword()">SHOW</span>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Login
+                </button>
+            </form>
+
+            <div class="links">
+                New Student?
+                <a href="/student-register/">Register</a>
+            </div>
+
+            <a href="{% url 'teacher_login' %}" class="switch">
+                👩‍🏫 Login as Teacher
+            </a>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function togglePassword(){
+    const input = document.getElementById("password");
+    const toggle = document.querySelector(".toggle-password");
+
+    if(input.type === "password"){
+        input.type = "text";
+        toggle.innerHTML = "HIDE";
+    }else{
+        input.type = "password";
+        toggle.innerHTML = "SHOW";
+    }
+}
+</script>
+
+</body>
+</html>

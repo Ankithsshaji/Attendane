@@ -1,0 +1,857 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}Mark Attendance{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+{% block page_subtitle %}AI & Manual Attendance{% endblock %}
+
+{% block content %}
+
+<style>
+.att-page{display:grid;gap:24px;animation:pageIn .6s ease;}
+@keyframes pageIn{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+
+.hero{
+    position:relative;overflow:hidden;border-radius:34px;padding:34px;color:white;
+    background:radial-gradient(circle at top right,rgba(6,182,212,.35),transparent 28%),
+    radial-gradient(circle at bottom left,rgba(236,72,153,.35),transparent 32%),
+    linear-gradient(135deg,#2563eb,#7c3aed);
+    box-shadow:0 28px 70px rgba(37,99,235,.25);
+}
+.hero h1{font-size:38px;font-weight:950;}
+.hero p{margin-top:8px;color:#dbeafe;font-weight:750;}
+
+.card,.section-card{
+    background:var(--surface);border:1px solid var(--border);border-radius:30px;
+    padding:26px;box-shadow:0 20px 50px rgba(15,23,42,.08);
+}
+
+.selected-info{display:grid;gap:18px;}
+
+.info-card{
+    padding:24px;border-radius:24px;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    color:white;
+}
+
+.info-card span{font-size:14px;font-weight:800;opacity:.8;}
+.info-card h2{margin-top:10px;font-size:32px;font-weight:950;}
+
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+.mini-card{
+    padding:22px;border-radius:22px;
+    background:var(--surface2);border:1px solid var(--border);
+}
+
+.mini-card span{color:var(--muted);font-size:13px;font-weight:800;}
+.mini-card h3{margin-top:10px;color:var(--text);font-size:22px;font-weight:950;}
+
+.mode-buttons{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px;}
+.mode-btn{
+    height:60px;border:none;border-radius:22px;color:white;font-size:16px;
+    font-weight:950;cursor:pointer;transition:.3s;
+}
+.manual-btn{background:linear-gradient(135deg,#2563eb,#06b6d4);}
+.auto-btn{background:linear-gradient(135deg,#22c55e,#14b8a6);}
+.mode-btn:hover,.save-btn:hover{transform:translateY(-4px);}
+
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:760px;}
+th{background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;padding:16px;text-align:left;}
+td{padding:16px;border-bottom:1px solid var(--border);color:var(--text);}
+
+.student{display:flex;align-items:center;gap:12px;}
+.avatar{width:46px;height:46px;border-radius:16px;object-fit:cover;border:2px solid #2563eb;}
+
+.status{display:flex;gap:10px;flex-wrap:wrap;}
+.status label{
+    padding:9px 13px;border-radius:999px;background:var(--surface2);
+    border:1px solid var(--border);cursor:pointer;font-weight:850;
+}
+.present{color:#22c55e;}
+.absent{color:#ef4444;}
+.late{color:#f59e0b;}
+.clear{color:var(--muted);}
+
+.save-btn{
+    margin-top:22px;min-height:52px;padding:0 22px;border:none;border-radius:18px;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);color:white;font-weight:950;cursor:pointer;
+}
+
+.video-wrapper{display:flex;justify-content:center;margin-top:10px;}
+
+video{
+    width:100%;
+    max-width:760px;
+    height:420px;
+    object-fit:cover;
+    display:block;
+    margin:auto;
+    border-radius:24px;
+    background:black;
+    border:4px solid #22c55e;
+    box-shadow:
+        0 0 20px rgba(34,197,94,.5),
+        0 20px 45px rgba(0,0,0,.35);
+    animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+    from{
+        box-shadow:
+            0 0 15px rgba(34,197,94,.4),
+            0 20px 45px rgba(0,0,0,.35);
+    }
+    to{
+        box-shadow:
+            0 0 35px rgba(34,197,94,.9),
+            0 20px 45px rgba(0,0,0,.35);
+    }
+}
+
+.camera-evidence-grid{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:24px;
+    align-items:start;
+    margin-top:20px;
+}
+
+@media(max-width:1000px){
+
+    .camera-evidence-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+.camera-buttons{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:20px;}
+.camera-buttons .save-btn{margin-top:0;}
+
+.ai-status{
+    margin-top:18px;padding:18px;border-radius:22px;background:var(--surface2);
+    text-align:center;color:#38bdf8;font-size:18px;font-weight:950;
+}
+
+.total-box{
+    margin-top:18px;padding:22px;border-radius:26px;
+    background:linear-gradient(135deg,#f59e0b,#ef4444);
+    color:white;text-align:center;font-size:22px;font-weight:950;
+}
+
+.students-grid{
+    margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;
+}
+
+.student-card{
+    background:var(--surface2);border:1px solid var(--border);border-left:5px solid #22c55e;
+    border-radius:22px;padding:18px;animation:studentIn .45s ease;
+}
+@keyframes studentIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.student-card h3{color:var(--text);font-size:20px;font-weight:950;}
+.student-card p{margin-top:8px;color:#22c55e;font-weight:900;}
+
+.empty{text-align:center;padding:48px;color:var(--muted);font-weight:850;}
+canvas{display:none;}
+.evidence-panel{
+    margin-bottom:25px;
+    padding:28px;
+    border-radius:28px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    box-shadow:0 20px 50px rgba(15,23,42,.08);
+}
+
+.evidence-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.evidence-header h3{
+    color:var(--text);
+    font-size:24px;
+    font-weight:950;
+}
+
+.evidence-header p{
+    color:var(--muted);
+}
+
+.evidence-badge{
+    background:#fef3c7;
+    color:#b45309;
+    padding:10px 16px;
+    border-radius:999px;
+    font-weight:900;
+}
+
+.evidence-preview{
+    min-height:250px;
+    border-radius:24px;
+    border:2px dashed var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--surface2);
+}
+
+.placeholder{
+    text-align:center;
+}
+
+.camera-icon{
+    font-size:50px;
+    margin-bottom:12px;
+}
+
+.capture-btn{
+    border:none;
+    padding:14px 24px;
+    border-radius:18px;
+    color:white;
+    font-weight:950;
+    cursor:pointer;
+    background:linear-gradient(135deg,#f59e0b,#ef4444);
+}
+
+.evidence-actions{
+    margin-top:20px;
+    text-align:center;
+}
+
+@media(max-width:900px){
+    .mode-buttons,.info-grid{grid-template-columns:1fr;}
+    video{height:300px;}
+}
+</style>
+
+<div class="att-page">
+
+    <section class="hero">
+        <h1>✅ Smart Attendance</h1>
+        <p>Manual attendance and AI camera attendance in one system.</p>
+    </section>
+
+    <section class="card">
+
+        <div class="selected-info">
+
+            <div class="info-card">
+                <span>📚 Subject</span>
+                <h2>{{ selected_subject.name }}</h2>
+            </div>
+
+            <div class="info-grid">
+
+                <div class="mini-card">
+                    <span>🏢 Department</span>
+                    <h3>{{ selected_department.name }}</h3>
+                </div>
+
+                <div class="mini-card">
+                    <span>🎓 Class</span>
+                    <h3>{{ selected_class.name }}</h3>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% if students %}
+        <div class="mode-buttons">
+            <button class="mode-btn manual-btn" onclick="showManual()" type="button">
+                📝 Manual Attendance
+            </button>
+
+            <button class="mode-btn auto-btn" onclick="showAutomatic()" type="button">
+                🤖 AI Attendance
+            </button>
+        </div>
+        {% endif %}
+
+    </section>
+
+    {% if students %}
+
+    <section id="manualSection" class="section-card">
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="department" value="{{ selected_department.id }}">
+            <input type="hidden" name="class" value="{{ selected_class.id }}">
+            <input type="hidden" name="subject" value="{{ selected_subject.id }}">
+
+            <div class="table-wrap">
+                <table>
+                    <tr>
+                        <th>Student</th>
+                        <th>Register Number</th>
+                        <th>Status</th>
+                    </tr>
+
+                    {% for student in students %}
+                    <tr>
+                        <td>
+                            <div class="student">
+                                {% if student.profile_photo %}
+                                <img src="{{ student.profile_photo.url }}" class="avatar">
+                                {% else %}
+                                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar">
+                                {% endif %}
+                                <strong>{{ student.user.first_name }}</strong>
+                            </div>
+                        </td>
+
+                        <td>{{ student.register_number }}</td>
+
+                        <td>
+                            <div class="status">
+                                <label class="clear">
+                                    <input type="radio" name="status_{{ student.id }}" value="" checked>
+                                    Not Marked
+                                </label>
+
+                                <label class="present">
+                                    <input type="radio" name="status_{{ student.id }}" value="Present">
+                                    Present
+                                </label>
+
+                                <label class="absent">
+                                    <input type="radio" name="status_{{ student.id }}" value="Absent">
+                                    Absent
+                                </label>
+
+                                <label class="late">
+                                    <input type="radio" name="status_{{ student.id }}" value="Late">
+                                    Late
+                                </label>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <button class="save-btn" type="submit">Save Attendance</button>
+        </form>
+    </section>
+
+    <section id="autoSection" class="section-card" style="display:none;">
+
+
+    <div class="camera-evidence-grid">
+
+        <div class="video-wrapper">
+            <video id="video"
+                autoplay
+                playsinline
+                muted>
+            </video>
+        </div>
+
+        <div class="evidence-panel">
+
+            <div class="evidence-header">
+
+                <div>
+                    <h3>📸 Classroom Verification</h3>
+
+                    <p>
+                        Capture classroom proof before AI attendance.
+                    </p>
+                </div>
+
+                <div class="evidence-badge">
+                    Required
+                </div>
+
+            </div>
+
+            <div class="evidence-preview"
+                id="evidencePreview">
+
+                <div class="placeholder">
+
+                    <div class="camera-icon">
+                        📷
+                    </div>
+
+                    <h4 style="font-size:24px;color:#2563eb;">
+                        📸 Ready to Capture
+                    </h4>
+
+                    <span>
+                        Capture classroom image
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="evidence-actions">
+
+                <button
+                    class="capture-btn"
+                    onclick="captureEvidence()"
+                    type="button">
+
+                    📸 Capture Evidence
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+        <div class="camera-buttons">
+            <button class="save-btn" onclick="switchCamera('user')" type="button">🤳 Front Camera</button>
+            <button class="save-btn" onclick="switchCamera('environment')" type="button">📷 Back Camera</button>
+            <button class="save-btn" onclick="startAttendance()" type="button">▶ Start AI</button>
+            <button class="save-btn" onclick="stopAttendance()" type="button" style="background:linear-gradient(135deg,#ef4444,#dc2626);">
+                ⏹ Stop & Save
+            </button>
+        </div>
+
+        <div class="ai-status" id="status">Waiting to start...</div>
+
+        <div class="total-box">
+            👥 Total Present:
+            <span id="totalCount">0</span>
+        </div>
+
+        <div class="students-grid" id="studentsGrid"></div>
+
+        <canvas id="canvas"></canvas>
+
+    </section>
+
+    {% else %}
+
+    <section class="section-card">
+        <div class="empty">
+            Open this page from the timetable Mark Attendance button.
+        </div>
+    </section>
+
+    {% endif %}
+
+</div>
+
+<script>
+const video = document.getElementById('video');
+const statusText = document.getElementById('status');
+const studentsGrid = document.getElementById('studentsGrid');
+const totalCount = document.getElementById('totalCount');
+const canvas = document.getElementById('canvas');
+
+const detectSound = new Audio(
+    'https://actions.google.com/sounds/v1/cartoon/pop.ogg'
+);
+
+let scannedStudents = new Set();
+let attendanceStarted = false;
+let scanInterval = null;
+let isSavingAttendance = false;
+let isCapturingFrame = false;
+
+function showManual(){
+    document.getElementById('manualSection').style.display = "block";
+    document.getElementById('autoSection').style.display = "none";
+    stopCameraOnly();
+}
+
+async function showAutomatic(){
+
+    document.getElementById('manualSection').style.display = "none";
+    document.getElementById('autoSection').style.display = "block";
+
+    await switchCamera('environment');
+
+    statusText.innerHTML =
+        "📷 Camera Ready - Capture Evidence";
+}
+
+function stopCameraOnly(){
+    attendanceStarted = false;
+
+    if(scanInterval){
+        clearInterval(scanInterval);
+        scanInterval = null;
+    }
+
+    if(window.currentStream){
+        window.currentStream.getTracks().forEach(track => track.stop());
+        window.currentStream = null;
+        window.cameraStarted = false;
+    }
+}
+
+async function switchCamera(cameraType){
+    try{
+        statusText.innerHTML = "📷 Starting Camera...";
+
+        stopCameraOnly();
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video:{
+                width:{ ideal:1920 },
+                height:{ ideal:1080 },
+                facingMode:cameraType
+            },
+            audio:false
+        });
+
+        video.srcObject = stream;
+        window.currentStream = stream;
+        window.cameraStarted = true;
+
+        video.style.transform = cameraType === "user" ? "scaleX(-1)" : "none";
+
+        await video.play();
+
+        statusText.innerHTML =
+            `✅ ${cameraType === "user" ? "Front" : "Back"} Camera Active`;
+
+    }catch(error){
+        console.log(error);
+        statusText.innerHTML = "❌ Camera Error. Allow camera permission.";
+    }
+}
+
+async function startAttendance(){
+    if(attendanceStarted){
+        return;
+    }
+
+    if(!window.cameraStarted){
+        await switchCamera('environment');
+    }
+
+    scannedStudents = new Set();
+    studentsGrid.innerHTML = "";
+    totalCount.innerHTML = "0";
+    isSavingAttendance = false;
+
+    attendanceStarted = true;
+    statusText.innerHTML = "🤖 AI Scanning Classroom...";
+
+    await captureFrame();
+
+    scanInterval = setInterval(async () => {
+        await captureFrame();
+    }, 1500);
+}
+
+async function stopAttendance(){
+    if(isSavingAttendance){
+        return;
+    }
+
+    attendanceStarted = false;
+    isSavingAttendance = true;
+
+    if(scanInterval){
+        clearInterval(scanInterval);
+        scanInterval = null;
+    }
+
+    const detectedIds = Array.from(scannedStudents);
+
+    statusText.innerHTML = "💾 Saving attendance...";
+
+    try{
+        const response = await fetch("/finalize-ai-attendance/", {
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json",
+                "X-CSRFToken":"{{ csrf_token }}"
+            },
+            body:JSON.stringify({
+                subject_id:"{{ selected_subject.id }}",
+                class_id:"{{ selected_class.id }}",
+                detected_ids:detectedIds
+            })
+        });
+
+        if(!response.ok){
+            throw new Error("Server error");
+        }
+
+        const data = await response.json();
+
+    if(data.success){
+        statusText.innerHTML =
+            `✅ Attendance Saved | Present: ${data.present_count} | Absent: ${data.absent_count}`;
+
+        setTimeout(() => {
+            window.location.href = "/teacher/dashboard/";
+        }, 2000);
+
+    }else{
+        statusText.innerHTML = "❌ Attendance Save Failed";
+        isSavingAttendance = false;
+    }
+
+    }catch(error){
+        console.log(error);
+        statusText.innerHTML = "❌ Stop Error";
+        isSavingAttendance = false;
+    }
+}
+
+async function captureFrame(){
+
+    if(
+        !attendanceStarted ||
+        !video.videoWidth ||
+        isCapturingFrame
+    ){
+        return;
+    }
+
+    isCapturingFrame = true;
+
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    const fullImage = canvas.toDataURL(
+        'image/jpeg',
+        0.95
+    );
+
+    try{
+
+        // STEP 1
+        // DETECT FACES
+
+        const detectResponse = await fetch(
+            '/detect-faces/',
+            {
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json',
+                    'X-CSRFToken':'{{ csrf_token }}'
+                },
+                body:JSON.stringify({
+                    image:fullImage
+                })
+            }
+        );
+
+        const detectData =
+            await detectResponse.json();
+
+        const boxes =
+            detectData.boxes || [];
+
+        let faceImages = [];
+
+        // STEP 2
+        // CROP EACH FACE
+
+        for(const box of boxes){
+
+            const {
+                top,
+                right,
+                bottom,
+                left
+            } = box;
+
+            const width =
+                right - left;
+
+            const height =
+                bottom - top;
+
+            const faceCanvas =
+                document.createElement('canvas');
+
+            faceCanvas.width = width;
+            faceCanvas.height = height;
+
+            const faceCtx =
+                faceCanvas.getContext('2d');
+
+            faceCtx.drawImage(
+
+                video,
+
+                left,
+                top,
+                width,
+                height,
+
+                0,
+                0,
+                width,
+                height
+
+            );
+
+            const croppedFace =
+                faceCanvas.toDataURL(
+                    'image/jpeg',
+                    0.95
+                );
+
+            faceImages.push(
+                croppedFace
+            );
+        }
+
+        // STEP 3
+        // SEND CROPPED FACES
+
+        const response = await fetch(
+            '/recognize-group/',
+            {
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json',
+                    'X-CSRFToken':'{{ csrf_token }}'
+                },
+                body:JSON.stringify({
+
+                    faces: faceImages,
+
+                    subject_id:
+                    "{{ selected_subject.id }}",
+
+                    class_id:
+                    "{{ selected_class.id }}"
+
+                })
+            }
+        );
+
+        const data =
+            await response.json();
+
+        if(
+            data.students &&
+            data.students.length > 0
+        ){
+
+            statusText.innerHTML =
+                `✅ ${data.students.length} Student(s) Detected`;
+
+            data.students.forEach(student => {
+
+                if(
+                    !scannedStudents.has(
+                        student.id
+                    )
+                ){
+
+                    scannedStudents.add(
+                        student.id
+                    );
+
+                    detectSound.currentTime = 0;
+
+                    detectSound.play()
+                    .catch(() => {});
+
+                    addStudentCard(student);
+
+                }
+
+            });
+
+            totalCount.innerHTML =
+                scannedStudents.size;
+
+        }else{
+
+            statusText.innerHTML =
+                "🔍 Scanning...";
+
+        }
+
+    }catch(error){
+
+        console.log(error);
+
+        statusText.innerHTML =
+            "❌ Detection Error";
+
+    }
+
+    isCapturingFrame = false;
+}
+async function captureEvidence(){
+
+    if(!video.videoWidth){
+        alert("Start camera first");
+        return;
+    }
+
+    const evidenceCanvas =
+        document.createElement("canvas");
+
+    evidenceCanvas.width =
+        video.videoWidth;
+
+    evidenceCanvas.height =
+        video.videoHeight;
+
+    const ctx =
+        evidenceCanvas.getContext("2d");
+
+    ctx.drawImage(
+        video,
+        0,
+        0
+    );
+
+    const image =
+        evidenceCanvas.toDataURL(
+            "image/jpeg",
+            0.95
+        );
+
+    document.getElementById("evidencePreview").innerHTML = `
+        <img
+            src="${image}"
+            style="
+            width:100%;
+            max-height:420px;
+            object-fit:cover;
+            border-radius:22px;
+            ">
+    `;
+
+    statusText.innerHTML =
+        "📸 Evidence Captured";
+}
+
+window.addEventListener("beforeunload", () => {
+    stopCameraOnly();
+});
+
+function addStudentCard(student){
+    studentsGrid.innerHTML += `
+        <div class="student-card">
+            <h3>👨‍🎓 ${student.name}</h3>
+            <p>🆔 ${student.register_number || "N/A"}</p>
+            <p>✅ Present Detected</p>
+        </div>
+    `;
+}
+</script>
+
+{% endblock %}

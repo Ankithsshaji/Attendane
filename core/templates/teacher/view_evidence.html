@@ -1,0 +1,59 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}Attendance Evidence{% endblock %}
+{% block page_title %}Evidence{% endblock %}
+
+{% block content %}
+
+<div style="
+max-width:900px;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:25px;
+box-shadow:0 20px 50px rgba(0,0,0,.1);
+">
+
+    <h2>📸 Attendance Evidence</h2>
+
+    <p>
+        <strong>Student:</strong>
+        {{ attendance.student.user.first_name }}
+    </p>
+
+    <p>
+        <strong>Subject:</strong>
+        {{ attendance.subject.name }}
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        {{ attendance.status }}
+    </p>
+
+    {% if evidence %}
+
+        <img
+            src="{{ evidence.photo.url }}"
+            style="
+            width:100%;
+            border-radius:20px;
+            margin-top:20px;
+            "
+        >
+
+    {% else %}
+
+        <div style="
+        padding:30px;
+        text-align:center;
+        color:gray;
+        ">
+            No evidence photo uploaded.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

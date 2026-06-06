@@ -1,0 +1,842 @@
+{% extends 'student/base.html' %}
+
+{% block content %}
+
+<style>
+
+.camera-box{
+    max-width:850px;
+    margin:auto;
+    background:#162044;
+    padding:30px;
+    border-radius:25px;
+    text-align:center;
+    color:white;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+.video-wrapper{
+    position:relative;
+}
+
+video{
+    width:100%;
+    max-height:520px;
+    object-fit:cover;
+    border-radius:20px;
+    border:4px solid #2563eb;
+    background:black;
+
+    /* ✅ MIRROR PREVIEW */
+
+    transform:scaleX(-1);
+    -webkit-transform:scaleX(-1);
+}
+
+.face-guide{
+    position:absolute;
+    width:260px;
+    height:340px;
+    border:4px dashed #38bdf8;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    pointer-events:none;
+}
+
+button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:14px 25px;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:16px;
+    margin-top:20px;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+button:disabled{
+    background:#475569;
+}
+
+.status{
+    margin-top:20px;
+    font-size:22px;
+    font-weight:bold;
+}
+
+.count{
+    margin-top:10px;
+    color:#38bdf8;
+    font-size:20px;
+}
+
+.pose{
+    margin-top:15px;
+    font-size:24px;
+    color:#facc15;
+    font-weight:bold;
+}
+
+.progress{
+    width:100%;
+    height:14px;
+    background:#334155;
+    border-radius:20px;
+    margin-top:20px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    width:0%;
+    height:100%;
+    background:#22c55e;
+    transition:0.3s;
+}
+
+.complete-box{
+    display:none;
+    margin-top:25px;
+    padding:25px;
+    background:#0f172a;
+    border-radius:15px;
+    border:2px solid #22c55e;
+}
+
+.complete-box h3{
+    color:#22c55e;
+}
+
+.complete-box a{
+    display:inline-block;
+    background:#22c55e;
+    color:white;
+    padding:12px 20px;
+    border-radius:10px;
+    text-decoration:none;
+    margin-top:15px;
+}
+
+canvas{
+    display:none;
+}
+
+.capture-flash{
+    animation:flash 0.15s;
+}
+
+@keyframes flash{
+
+    0%{
+        opacity:1;
+    }
+
+    50%{
+        opacity:0.5;
+    }
+
+    100%{
+        opacity:1;
+    }
+}
+
+</style>
+
+<div class="camera-box">
+
+    <h2>
+
+        🎭 AI Face Registration
+
+    </h2>
+
+    <div class="video-wrapper">
+
+        <video
+            id="video"
+            autoplay
+            muted
+            playsinline
+        ></video>
+
+        <div class="face-guide"></div>
+
+    </div>
+
+    <button
+        id="captureBtn"
+        onclick="startCapture()"
+    >
+
+        Start Face Capture
+
+    </button>
+
+    <div
+        class="status"
+        id="status"
+    >
+
+        Waiting to start...
+
+    </div>
+
+    <div
+        class="count"
+        id="count"
+    >
+
+        Captured: 0 / 30
+
+    </div>
+
+    <div
+        class="pose"
+        id="pose"
+    >
+
+        📌 CENTER
+
+    </div>
+
+    <div class="progress">
+
+        <div
+            class="progress-bar"
+            id="progressBar"
+        ></div>
+
+    </div>
+
+    <div
+        class="complete-box"
+        id="completeBox"
+    >
+
+        <h3>
+
+            ✅ Registration Completed
+
+        </h3>
+
+        <p>
+
+            AI face dataset created successfully.
+
+        </p>
+
+        <a href="{% url 'student_profile' %}">
+
+            ⬅ Back to Profile
+
+        </a>
+
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+</div>
+
+<!-- MEDIAPIPE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+
+<script>
+
+/* ELEMENTS */
+
+const video =
+    document.getElementById('video');
+
+const statusText =
+    document.getElementById('status');
+
+const countText =
+    document.getElementById('count');
+
+const poseText =
+    document.getElementById('pose');
+
+const captureBtn =
+    document.getElementById('captureBtn');
+
+const completeBox =
+    document.getElementById('completeBox');
+
+const progressBar =
+    document.getElementById('progressBar');
+
+
+/* VARIABLES */
+
+let captureCount = 0;
+
+let isCapturing = false;
+
+let currentStream = null;
+
+let lastCaptureTime = 0;
+
+let currentPoseIndex = 0;
+
+let poseLocked = false;
+
+
+/* POSES */
+
+const poses = [
+
+    "CENTER",
+
+    "LEFT",
+
+    "RIGHT",
+
+    "UP",
+
+    "DOWN",
+
+    "SMILE"
+
+];
+
+
+/* START CAMERA */
+
+async function startCamera(){
+
+    try{
+
+        if(currentStream){
+
+            currentStream
+                .getTracks()
+                .forEach(track => track.stop());
+        }
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+
+            audio:false,
+
+            video:{
+
+                facingMode:"user",
+
+                width:{ ideal:1280 },
+
+                height:{ ideal:720 }
+            }
+        });
+
+        currentStream = stream;
+
+        video.srcObject = stream;
+
+        /* ✅ MIRROR PREVIEW */
+
+        video.style.transform = "scaleX(-1)";
+
+        await video.play();
+
+    }
+
+    catch(error){
+
+        alert(
+            "Unable to access camera"
+        );
+
+        console.log(error);
+    }
+}
+
+startCamera();
+
+
+/* START CAPTURE */
+
+function startCapture(){
+
+    if(isCapturing){
+
+        return;
+    }
+
+    isCapturing = true;
+
+    captureBtn.disabled = true;
+
+    statusText.innerHTML =
+        "📸 Capture Started";
+
+    poseText.innerHTML =
+
+        `📌 ${poses[currentPoseIndex]}`;
+}
+
+
+/* FACEMESH */
+
+const faceMesh = new FaceMesh({
+
+    locateFile: (file) => {
+
+        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+    }
+});
+
+faceMesh.setOptions({
+
+    maxNumFaces:1,
+
+    refineLandmarks:true,
+
+    minDetectionConfidence:0.7,
+
+    minTrackingConfidence:0.7
+});
+
+faceMesh.onResults(onResults);
+
+
+/* DETECTION LOOP */
+
+video.addEventListener('loadeddata', async () => {
+
+    async function detect(){
+
+        if(isCapturing){
+
+            await faceMesh.send({
+
+                image: video
+            });
+        }
+
+        requestAnimationFrame(detect);
+    }
+
+    detect();
+});
+
+
+/* RESULTS */
+
+async function onResults(results){
+
+    if(!isCapturing){
+
+        return;
+    }
+
+    if(
+
+        !results.multiFaceLandmarks ||
+
+        results.multiFaceLandmarks.length === 0
+
+    ){
+
+        statusText.innerHTML =
+            "❌ No Face Detected";
+
+        return;
+    }
+
+    const landmarks =
+        results.multiFaceLandmarks[0];
+
+    const nose =
+        landmarks[1];
+
+    const leftMouth =
+        landmarks[61];
+
+    const rightMouth =
+        landmarks[291];
+
+    const upperLip =
+        landmarks[13];
+
+    const lowerLip =
+        landmarks[14];
+
+    const currentPose =
+        poses[currentPoseIndex];
+
+    let validPose = false;
+
+
+    /* CENTER */
+
+    if(
+
+        currentPose === "CENTER" &&
+
+        nose.x > 0.45 &&
+        nose.x < 0.55
+
+    ){
+
+        validPose = true;
+    }
+
+
+    /* LEFT */
+
+   /* LEFT */
+
+    if(
+
+        currentPose === "LEFT" &&
+
+        nose.x > 0.60
+
+    ){
+
+        validPose = true;
+
+        statusText.innerHTML =
+            "⬅ LEFT DETECTED";
+    }
+
+
+    /* RIGHT */
+
+ /* RIGHT */
+
+    if(
+
+        currentPose === "RIGHT" &&
+
+        nose.x < 0.40
+
+    ){
+
+        validPose = true;
+
+        statusText.innerHTML =
+            "➡ RIGHT DETECTED";
+    }
+
+
+    /* UP */
+
+    if(
+
+        currentPose === "UP" &&
+
+        nose.y < 0.40
+
+    ){
+
+        validPose = true;
+    }
+
+
+    /* DOWN */
+
+    if(
+
+        currentPose === "DOWN" &&
+
+        nose.y > 0.56
+
+    ){
+
+        validPose = true;
+    }
+
+
+    /* SMILE */
+
+    const mouthWidth =
+
+        Math.abs(
+
+            rightMouth.x -
+
+            leftMouth.x
+        );
+
+    const mouthOpen =
+
+        Math.abs(
+
+            lowerLip.y -
+
+            upperLip.y
+        );
+
+    if(
+
+        currentPose === "SMILE" &&
+
+        mouthWidth > 0.040 &&
+
+        mouthOpen > 0.008
+
+    ){
+
+        validPose = true;
+
+        statusText.innerHTML =
+            "😄 Smile Detected";
+    }
+
+
+    /* CAPTURE */
+
+    const now = Date.now();
+
+    if(
+
+        validPose &&
+
+        !poseLocked &&
+
+        now - lastCaptureTime > 400
+
+    ){
+
+        poseLocked = true;
+
+        lastCaptureTime = now;
+
+        await captureImage();
+
+        setTimeout(() => {
+
+            poseLocked = false;
+
+        }, 400);
+
+
+        if(captureCount % 5 === 0){
+
+            currentPoseIndex++;
+
+            poseLocked = false;
+
+            if(
+
+                currentPoseIndex < poses.length
+
+            ){
+
+                poseText.innerHTML =
+
+                    `📌 ${poses[currentPoseIndex]}`;
+            }
+        }
+    }
+}
+
+
+/* CAPTURE IMAGE */
+
+async function captureImage(){
+
+    const canvas =
+        document.getElementById('canvas');
+
+    const ctx =
+        canvas.getContext('2d');
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+    /* ✅ SAVE NORMAL NON-MIRRORED IMAGE */
+
+    ctx.setTransform(
+        1,
+        0,
+        0,
+        1,
+        0,
+        0
+    );
+
+    ctx.drawImage(
+
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    const tempCanvas =
+        document.createElement('canvas');
+
+    const tempCtx =
+        tempCanvas.getContext('2d');
+
+    const faceWidth = 420;
+
+    const faceHeight = 500;
+
+    const sx =
+        (canvas.width / 2) - 210;
+
+    const sy =
+        (canvas.height / 2) - 250;
+
+    tempCanvas.width =
+        faceWidth;
+
+    tempCanvas.height =
+        faceHeight;
+
+    tempCtx.drawImage(
+
+        canvas,
+
+        sx,
+        sy,
+        faceWidth,
+        faceHeight,
+
+        0,
+        0,
+        faceWidth,
+        faceHeight
+    );
+
+    const image =
+        tempCanvas.toDataURL(
+            'image/jpeg',
+            0.95
+        );
+
+    await fetch('/save-face/', {
+
+        method:'POST',
+
+        headers:{
+
+            'Content-Type':'application/json',
+
+            'X-CSRFToken':'{{ csrf_token }}'
+        },
+
+        body:JSON.stringify({
+
+            image:image
+        })
+    });
+
+    captureCount++;
+
+    countText.innerHTML =
+
+        `Captured: ${captureCount} / 30`;
+
+    updateProgress();
+
+    statusText.innerHTML =
+        "✅ Face Captured";
+
+    if(captureCount >= 30){
+
+        finishCapture();
+    }
+}
+
+
+/* PROGRESS */
+
+function updateProgress(){
+
+    progressBar.style.width =
+
+        `${(captureCount / 30) * 100}%`;
+}
+
+
+/* FINISH */
+
+async function finishCapture(){
+
+    isCapturing = false;
+
+    statusText.innerHTML =
+        "🤖 Training AI Model...";
+
+    poseText.innerHTML =
+        "⏳ Please Wait";
+
+    try{
+
+        const response = await fetch(
+
+            '/finalize-training/',
+
+            {
+
+                method:'POST',
+
+                headers:{
+
+                    'Content-Type':'application/json',
+
+                    'X-CSRFToken':'{{ csrf_token }}'
+                }
+            }
+        );
+
+        const data =
+            await response.json();
+
+        if(data.success){
+
+            statusText.innerHTML =
+                "🎉 Registration Complete";
+
+            poseText.innerHTML =
+                "✅ AI Model Ready";
+
+            completeBox.style.display =
+                "block";
+
+            setTimeout(() => {
+
+                window.location.href =
+
+                    "{% url 'student_profile' %}";
+
+            }, 4000);
+
+        }else{
+
+            statusText.innerHTML =
+                "❌ Training Failed";
+        }
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        statusText.innerHTML =
+            "❌ Training Error";
+    }
+}
+
+</script>
+
+{% endblock %}

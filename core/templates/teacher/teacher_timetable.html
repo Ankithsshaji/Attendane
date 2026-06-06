@@ -1,0 +1,402 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}Teacher Timetable{% endblock %}
+{% block page_title %}Timetable{% endblock %}
+
+{% block content %}
+
+<style>
+.timetable-page{
+    display:grid;
+    gap:26px;
+    animation:pageFade .7s ease;
+}
+
+@keyframes pageFade{
+    from{opacity:0;transform:translateY(25px);}
+    to{opacity:1;transform:translateY(0);}
+}
+
+.hero{
+    position:relative;
+    overflow:hidden;
+    padding:38px;
+    border-radius:34px;
+    color:white;
+    background:
+        radial-gradient(circle at 10% 20%,rgba(255,255,255,.28),transparent 22%),
+        radial-gradient(circle at 90% 10%,rgba(34,211,238,.35),transparent 28%),
+        linear-gradient(135deg,#0f172a,#2563eb,#7c3aed);
+    box-shadow:0 30px 80px rgba(37,99,235,.35);
+}
+
+.hero::before{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:rgba(255,255,255,.12);
+    right:-80px;
+    top:-90px;
+    animation:floatBall 6s ease-in-out infinite;
+}
+
+.hero::after{
+    content:"";
+    position:absolute;
+    width:170px;
+    height:170px;
+    border-radius:50%;
+    background:rgba(34,211,238,.18);
+    left:45%;
+    bottom:-80px;
+    animation:floatBall 7s ease-in-out infinite reverse;
+}
+
+@keyframes floatBall{
+    0%,100%{transform:translateY(0) scale(1);}
+    50%{transform:translateY(22px) scale(1.08);}
+}
+
+.hero-content{
+    position:relative;
+    z-index:2;
+}
+
+.hero h1{
+    font-size:42px;
+    font-weight:950;
+    margin:0;
+}
+
+.hero p{
+    margin-top:10px;
+    color:#dbeafe;
+    font-size:16px;
+    font-weight:750;
+}
+
+.stats-row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:18px;
+}
+
+.stat-card{
+    position:relative;
+    overflow:hidden;
+    padding:22px;
+    border-radius:26px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    box-shadow:0 18px 45px rgba(15,23,42,.08);
+    transition:.35s ease;
+}
+
+.stat-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 25px 60px rgba(37,99,235,.18);
+}
+
+.stat-card span{
+    color:var(--muted);
+    font-weight:850;
+    font-size:13px;
+}
+
+.stat-card h2{
+    margin-top:8px;
+    color:var(--text);
+    font-size:28px;
+    font-weight:950;
+}
+
+.table-card{
+    position:relative;
+    overflow:hidden;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    border-radius:34px;
+    padding:24px;
+    box-shadow:0 25px 70px rgba(15,23,42,.10);
+}
+
+.table-scroll{
+    overflow-x:auto;
+    padding-bottom:8px;
+}
+
+table{
+    width:100%;
+    min-width:1100px;
+    border-collapse:separate;
+    border-spacing:0 14px;
+}
+
+th{
+    position:sticky;
+    top:0;
+    z-index:3;
+    padding:18px;
+    color:white;
+    font-size:14px;
+    font-weight:950;
+    text-align:center;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+}
+
+th:first-child{
+    border-radius:18px 0 0 18px;
+}
+
+th:last-child{
+    border-radius:0 18px 18px 0;
+}
+
+td{
+    position:relative;
+    padding:18px;
+    text-align:center;
+    vertical-align:top;
+    color:var(--text);
+    background:var(--surface);
+    border:1px solid var(--border);
+    box-shadow:0 12px 35px rgba(15,23,42,.06);
+    transition:.3s ease;
+}
+
+td:hover{
+    transform:scale(1.02);
+    z-index:2;
+    box-shadow:0 22px 55px rgba(37,99,235,.16);
+}
+
+.time-cell{
+    border-radius:22px;
+    font-weight:950;
+    color:white;
+    background:linear-gradient(135deg,#0f172a,#2563eb);
+    white-space:nowrap;
+}
+
+.subject-box{
+    display:grid;
+    gap:10px;
+    padding:14px;
+    border-radius:22px;
+    background:
+        radial-gradient(circle at top right,rgba(34,211,238,.18),transparent 30%),
+        linear-gradient(135deg,var(--surface2),var(--surface));
+    border:1px solid var(--border);
+    animation:cardPop .45s ease;
+}
+
+@keyframes cardPop{
+    from{opacity:0;transform:translateY(15px) scale(.96);}
+    to{opacity:1;transform:translateY(0) scale(1);}
+}
+
+.subject-icon{
+    width:46px;
+    height:46px;
+    margin:auto;
+    display:grid;
+    place-items:center;
+    border-radius:17px;
+    color:white;
+    font-size:22px;
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    box-shadow:0 12px 30px rgba(37,99,235,.25);
+}
+
+.subject-name{
+    font-size:18px;
+    font-weight:950;
+    color:var(--text);
+}
+
+.class-name{
+    font-size:14px;
+    font-weight:900;
+    color:#22c55e;
+}
+
+.dept-name{
+    width:max-content;
+    margin:auto;
+    padding:6px 12px;
+    border-radius:999px;
+    background:#2563eb22;
+    color:#2563eb;
+    font-size:12px;
+    font-weight:950;
+}
+
+.mark-btn{
+    width:max-content;
+    margin:6px auto 0;
+    padding:11px 16px;
+    border-radius:999px;
+    text-decoration:none;
+    color:white;
+    font-size:13px;
+    font-weight:950;
+    background:linear-gradient(135deg,#22c55e,#14b8a6);
+    box-shadow:0 12px 28px rgba(34,197,94,.25);
+    transition:.3s ease;
+}
+
+.mark-btn:hover{
+    transform:translateY(-4px) scale(1.04);
+    box-shadow:0 18px 38px rgba(34,197,94,.35);
+}
+
+.no-class{
+    display:grid;
+    place-items:center;
+    min-height:120px;
+    color:var(--muted);
+    font-weight:900;
+    border-radius:20px;
+    background:var(--surface2);
+    border:1px dashed var(--border);
+}
+
+.empty{
+    padding:45px;
+    color:var(--muted);
+    font-weight:950;
+    text-align:center;
+}
+
+@media(max-width:800px){
+    .hero{
+        padding:28px;
+    }
+
+    .hero h1{
+        font-size:30px;
+    }
+
+    .table-card{
+        padding:14px;
+    }
+}
+</style>
+
+<div class="timetable-page">
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>📅 Animated Weekly Timetable</h1>
+            <p>View subject, class, department and open attendance directly from each period.</p>
+        </div>
+    </section>
+
+    <section class="stats-row">
+        <div class="stat-card">
+            <span>📚 Page</span>
+            <h2>Timetable</h2>
+        </div>
+
+        <div class="stat-card">
+            <span>✅ Action</span>
+            <h2>Attendance</h2>
+        </div>
+
+        <div class="stat-card">
+            <span>🤖 Mode</span>
+            <h2>AI + Manual</h2>
+        </div>
+    </section>
+
+    <section class="table-card">
+        <div class="table-scroll">
+
+            <table>
+
+                <tr>
+                    <th>Time</th>
+                    {% for day in days %}
+                        <th>{{ day }}</th>
+                    {% endfor %}
+                </tr>
+
+                {% for start_time, end_time in times %}
+
+                <tr>
+
+                    <td class="time-cell">
+                        {{ start_time|time:"h:i A" }} - {{ end_time|time:"h:i A" }}
+                    </td>
+
+                    {% for day in days %}
+
+                    <td>
+
+                        {% with found=False %}
+
+                            {% for item in timetables %}
+
+                                {% if item.day == day and item.start_time == start_time and item.end_time == end_time %}
+
+                                    <div class="subject-box">
+
+                                        <div class="subject-icon">📘</div>
+
+                                        <div class="subject-name">
+                                            {{ item.subject.name }}
+                                        </div>
+
+                                        <div class="class-name">
+                                            🎓 {{ item.class_room.name }}
+                                        </div>
+
+                                        <div class="dept-name">
+                                            🏢 {{ item.department.name }}
+                                        </div>
+
+                                        <a
+                                            class="mark-btn"
+                                            href="{% url 'teacher_mark_attendance' %}?department={{ item.department.id }}&class={{ item.class_room.id }}&subject={{ item.subject.id }}"
+                                        >
+                                            ✅ Mark Attendance
+                                        </a>
+
+                                    </div>
+
+                                {% endif %}
+
+                            {% empty %}
+
+                                <div class="no-class">—</div>
+
+                            {% endfor %}
+
+                        {% endwith %}
+
+                    </td>
+
+                    {% endfor %}
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="7" class="empty">
+                        No timetable added yet.
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </table>
+
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

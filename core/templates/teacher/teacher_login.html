@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+            min-height:100vh;
+            font-family:'Plus Jakarta Sans',sans-serif;
+            background:#050816;
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+        }
+
+        .bg-orb{
+            position:absolute;
+            border-radius:50%;
+            filter:blur(80px);
+            opacity:.55;
+            animation:float 8s infinite alternate ease-in-out;
+        }
+
+        .orb1{
+            width:430px;
+            height:430px;
+            background:#7c3aed;
+            top:-130px;
+            left:-120px;
+        }
+
+        .orb2{
+            width:390px;
+            height:390px;
+            background:#06b6d4;
+            right:-100px;
+            bottom:-120px;
+            animation-delay:1s;
+        }
+
+        .orb3{
+            width:260px;
+            height:260px;
+            background:#22c55e;
+            right:25%;
+            top:12%;
+            opacity:.25;
+            animation-delay:2s;
+        }
+
+        @keyframes float{
+            from{transform:translate(0,0) scale(1);}
+            to{transform:translate(70px,-45px) scale(1.15);}
+        }
+
+        .wrapper{
+            position:relative;
+            z-index:2;
+            width:92%;
+            max-width:1050px;
+            min-height:610px;
+            display:grid;
+            grid-template-columns:1fr 420px;
+            background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.14);
+            border-radius:38px;
+            overflow:hidden;
+            backdrop-filter:blur(22px);
+            box-shadow:0 35px 90px rgba(0,0,0,.5);
+            animation:pageIn .8s ease;
+        }
+
+        @keyframes pageIn{
+            from{opacity:0;transform:translateY(35px) scale(.96);}
+            to{opacity:1;transform:translateY(0) scale(1);}
+        }
+
+        .hero{
+            position:relative;
+            padding:50px;
+            overflow:hidden;
+            background:
+                radial-gradient(circle at 20% 20%,rgba(124,58,237,.55),transparent 28%),
+                linear-gradient(135deg,rgba(37,99,235,.28),rgba(2,6,23,.2));
+        }
+
+        .hero::before{
+            content:"";
+            position:absolute;
+            width:360px;
+            height:360px;
+            border:1px solid rgba(255,255,255,.14);
+            border-radius:50%;
+            right:-100px;
+            bottom:-120px;
+            animation:spin 20s linear infinite;
+        }
+
+        .hero::after{
+            content:"";
+            position:absolute;
+            width:180px;
+            height:180px;
+            border:1px dashed rgba(255,255,255,.22);
+            border-radius:50%;
+            right:90px;
+            bottom:90px;
+            animation:spin 12s linear infinite reverse;
+        }
+
+        @keyframes spin{
+            to{transform:rotate(360deg);}
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            position:relative;
+            z-index:2;
+            margin-bottom:76px;
+        }
+
+        .brand-icon{
+            width:54px;
+            height:54px;
+            border-radius:18px;
+            display:grid;
+            place-items:center;
+            background:linear-gradient(135deg,#7c3aed,#06b6d4);
+            font-weight:900;
+            box-shadow:0 16px 35px rgba(6,182,212,.25);
+        }
+
+        .brand h2{
+            font-size:28px;
+            font-weight:950;
+        }
+
+        .tag{
+            color:#cbd5e1;
+            font-size:13px;
+            font-weight:700;
+        }
+
+        .hero-title{
+            position:relative;
+            z-index:2;
+            max-width:560px;
+            font-size:58px;
+            line-height:1.02;
+            letter-spacing:-2px;
+            font-weight:950;
+            margin-bottom:22px;
+        }
+
+        .hero-title span{
+            background:linear-gradient(135deg,#38bdf8,#a78bfa,#f0abfc);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+
+        .hero-text{
+            position:relative;
+            z-index:2;
+            max-width:470px;
+            color:#cbd5e1;
+            line-height:1.8;
+            font-weight:650;
+        }
+
+        .mini-cards{
+            position:relative;
+            z-index:2;
+            display:grid;
+            grid-template-columns:repeat(3,1fr);
+            gap:14px;
+            margin-top:44px;
+        }
+
+        .mini-card{
+            background:rgba(255,255,255,.1);
+            border:1px solid rgba(255,255,255,.14);
+            border-radius:20px;
+            padding:18px;
+            animation:cardFloat 3s infinite ease-in-out;
+        }
+
+        .mini-card:nth-child(2){
+            animation-delay:.4s;
+        }
+
+        .mini-card:nth-child(3){
+            animation-delay:.8s;
+        }
+
+        @keyframes cardFloat{
+            0%,100%{transform:translateY(0);}
+            50%{transform:translateY(-8px);}
+        }
+
+        .mini-card h3{
+            font-size:24px;
+            margin-bottom:5px;
+        }
+
+        .mini-card p{
+            color:#cbd5e1;
+            font-size:12px;
+            font-weight:800;
+        }
+
+        .login-side{
+            padding:46px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:rgba(2,6,23,.42);
+        }
+
+        .login-card{
+            width:100%;
+            max-width:360px;
+        }
+
+        .login-icon{
+            width:82px;
+            height:82px;
+            margin:0 auto 18px;
+            border-radius:28px;
+            display:grid;
+            place-items:center;
+            background:linear-gradient(135deg,#7c3aed,#06b6d4);
+            font-size:34px;
+            box-shadow:0 20px 45px rgba(124,58,237,.35);
+            animation:pulse 2.4s infinite;
+        }
+
+        @keyframes pulse{
+            0%,100%{transform:scale(1);}
+            50%{transform:scale(1.07);}
+        }
+
+        .login-head{
+            text-align:center;
+            margin-bottom:28px;
+        }
+
+        .login-head h1{
+            font-size:32px;
+            font-weight:950;
+        }
+
+        .login-head p{
+            color:#94a3b8;
+            margin-top:8px;
+            font-weight:700;
+            font-size:14px;
+        }
+
+        .error{
+            padding:13px;
+            border-radius:16px;
+            background:rgba(239,68,68,.14);
+            border:1px solid rgba(239,68,68,.35);
+            color:#fca5a5;
+            text-align:center;
+            font-weight:800;
+            margin-bottom:16px;
+        }
+
+        .input-group{
+            position:relative;
+            margin-bottom:16px;
+        }
+
+        .input-group input{
+            width:100%;
+            height:58px;
+            border-radius:19px;
+            border:1px solid rgba(255,255,255,.13);
+            background:rgba(255,255,255,.09);
+            color:white;
+            outline:none;
+            padding:0 52px 0 18px;
+            font-size:14px;
+            font-weight:750;
+            transition:.28s;
+        }
+
+        .input-group input::placeholder{
+            color:#94a3b8;
+        }
+
+        .input-group input:focus{
+            border-color:#38bdf8;
+            background:rgba(255,255,255,.14);
+            box-shadow:0 0 0 4px rgba(56,189,248,.16);
+        }
+
+        .input-icon,
+        .toggle-password{
+            position:absolute;
+            right:18px;
+            top:50%;
+            transform:translateY(-50%);
+        }
+
+        .input-icon{
+            color:#94a3b8;
+        }
+
+        .toggle-password{
+            color:#38bdf8;
+            font-size:12px;
+            font-weight:950;
+            cursor:pointer;
+            user-select:none;
+        }
+
+        .login-btn{
+            width:100%;
+            height:58px;
+            border:none;
+            border-radius:19px;
+            margin-top:4px;
+            background:linear-gradient(135deg,#7c3aed,#2563eb,#06b6d4);
+            color:white;
+            font-weight:950;
+            font-size:15px;
+            cursor:pointer;
+            position:relative;
+            overflow:hidden;
+            transition:.3s;
+        }
+
+        .login-btn::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            left:-100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+            transition:.7s;
+        }
+
+        .login-btn:hover::before{
+            left:100%;
+        }
+
+        .login-btn:hover{
+            transform:translateY(-5px);
+            box-shadow:0 22px 42px rgba(37,99,235,.38);
+        }
+
+        .switch{
+            height:56px;
+            margin-top:17px;
+            border-radius:19px;
+            border:1px solid rgba(255,255,255,.14);
+            background:rgba(255,255,255,.09);
+            color:white;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-decoration:none;
+            font-weight:950;
+            transition:.3s;
+        }
+
+        .switch:hover{
+            background:linear-gradient(135deg,#e040fb,#7c3aed);
+            transform:translateY(-5px);
+            box-shadow:0 20px 38px rgba(224,64,251,.28);
+        }
+
+        @media(max-width:900px){
+            .wrapper{
+                grid-template-columns:1fr;
+                max-width:460px;
+            }
+
+            .hero{
+                display:none;
+            }
+
+            .login-side{
+                padding:36px 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+
+<div class="wrapper">
+
+    <section class="hero">
+
+        <div class="brand">
+            <div class="brand-icon">AX</div>
+
+            <div>
+                <h2>AttendX</h2>
+                <div class="tag">Teacher Portal</div>
+            </div>
+        </div>
+
+        <h1 class="hero-title">
+            Manage classes with <span>smart attendance</span>
+        </h1>
+
+        <p class="hero-text">
+            Take attendance, review reports, monitor students, and manage classroom activity from one modern teacher dashboard.
+        </p>
+
+        <div class="mini-cards">
+            <div class="mini-card">
+                <h3>📊</h3>
+                <p>Analytics</p>
+            </div>
+
+            <div class="mini-card">
+                <h3>🧑‍🏫</h3>
+                <p>Classes</p>
+            </div>
+
+            <div class="mini-card">
+                <h3>✅</h3>
+                <p>Attendance</p>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="login-side">
+
+        <div class="login-card">
+
+            <div class="login-head">
+                <div class="login-icon">👩‍🏫</div>
+                <h1>Teacher Login</h1>
+                <p>Secure access to your dashboard</p>
+            </div>
+
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <input type="text" name="username" placeholder="Teacher username" required>
+                    <span class="input-icon">👤</span>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                    <span class="toggle-password" onclick="togglePassword()">SHOW</span>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    Login to Dashboard
+                </button>
+            </form>
+
+            <a href="{% url 'student_login' %}" class="switch">
+                👨‍🎓 Login as Student
+            </a>
+
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+function togglePassword(){
+    const input = document.getElementById("password");
+    const toggle = document.querySelector(".toggle-password");
+
+    if(input.type === "password"){
+        input.type = "text";
+        toggle.innerHTML = "HIDE";
+    }else{
+        input.type = "password";
+        toggle.innerHTML = "SHOW";
+    }
+}
+</script>
+
+</body>
+</html>

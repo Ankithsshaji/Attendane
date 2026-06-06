@@ -1,0 +1,664 @@
+{% extends "student/base.html" %}
+
+{% block title %}Profile{% endblock %}
+{% block page_title %}Profile{% endblock %}
+{% block page_subtitle %}Student Account{% endblock %}
+
+{% block content %}
+
+<style>
+.profile-page{
+    width:100%;
+    animation:pageIn .7s ease;
+}
+
+@keyframes pageIn{
+    from{opacity:0; transform:translateY(24px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+.profile-hero{
+    display:grid;
+    grid-template-columns:1fr .9fr;
+    gap:24px;
+    margin-bottom:24px;
+}
+
+.profile-card{
+    position:relative;
+    overflow:hidden;
+    border-radius:36px;
+    padding:34px;
+    background:
+        radial-gradient(circle at top right, rgba(224,64,251,.35), transparent 34%),
+        linear-gradient(135deg, rgba(108,62,255,.24), rgba(0,198,255,.10));
+    border:1px solid var(--border);
+}
+
+.profile-card::before{
+    content:"";
+    position:absolute;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:rgba(108,62,255,.22);
+    filter:blur(24px);
+    left:-90px;
+    bottom:-90px;
+    animation:floatGlow 6s infinite alternate ease-in-out;
+}
+
+@keyframes floatGlow{
+    from{transform:translateY(0) scale(1);}
+    to{transform:translateY(-28px) scale(1.12);}
+}
+
+.profile-top{
+    position:relative;
+    z-index:2;
+    display:flex;
+    align-items:center;
+    gap:26px;
+}
+
+.profile-img{
+    width:136px;
+    height:136px;
+    border-radius:34px;
+    object-fit:cover;
+    border:4px solid rgba(255,255,255,.38);
+    box-shadow:0 20px 45px rgba(108,62,255,.25);
+    animation:imagePulse 3s infinite;
+}
+
+@keyframes imagePulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.035);}
+}
+
+.profile-name{
+    font-size:42px;
+    font-weight:950;
+    color:var(--text);
+    letter-spacing:-1.4px;
+}
+
+.profile-meta{
+    margin-top:8px;
+    color:var(--muted);
+    font-size:15px;
+    font-weight:700;
+}
+
+.btn-group{
+    margin-top:22px;
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.action-btn{
+    position:relative;
+    overflow:hidden;
+    border:none;
+    border-radius:18px;
+    padding:14px 20px;
+    cursor:pointer;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:900;
+    color:white;
+    background:linear-gradient(135deg,#6c3eff,#2563eb);
+    transition:.35s;
+}
+
+.action-btn::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:100%;
+    height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.26),transparent);
+    transition:.7s;
+}
+
+.action-btn:hover::before{
+    left:100%;
+}
+
+.action-btn:hover{
+    transform:translateY(-5px);
+    box-shadow:0 16px 32px rgba(108,62,255,.28);
+}
+
+.face-btn{
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+}
+
+.quick-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:36px;
+    padding:28px;
+    display:grid;
+    gap:16px;
+}
+
+.quick-title{
+    font-size:22px;
+    font-weight:950;
+    color:var(--text);
+}
+
+.quick-item{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:15px;
+    border-radius:20px;
+    background:var(--surface2);
+    animation:itemIn .55s ease both;
+}
+
+.quick-item:nth-child(2){animation-delay:.1s;}
+.quick-item:nth-child(3){animation-delay:.2s;}
+.quick-item:nth-child(4){animation-delay:.3s;}
+
+@keyframes itemIn{
+    from{opacity:0; transform:translateX(18px);}
+    to{opacity:1; transform:translateX(0);}
+}
+
+.quick-icon{
+    width:44px;
+    height:44px;
+    border-radius:16px;
+    display:grid;
+    place-items:center;
+    background:linear-gradient(135deg,#6c3eff,#00c6ff);
+    color:white;
+    flex-shrink:0;
+}
+
+.quick-label{
+    font-size:12px;
+    font-weight:900;
+    text-transform:uppercase;
+    color:var(--muted);
+}
+
+.quick-value{
+    font-size:15px;
+    font-weight:900;
+    color:var(--text);
+    margin-top:3px;
+}
+
+.edit-form{
+    display:none;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:34px;
+    padding:30px;
+    margin-bottom:24px;
+    animation:formDrop .45s ease;
+}
+
+@keyframes formDrop{
+    from{opacity:0; transform:translateY(-18px) scale(.98);}
+    to{opacity:1; transform:translateY(0) scale(1);}
+}
+
+.form-title{
+    font-size:24px;
+    font-weight:950;
+    color:var(--text);
+    margin-bottom:20px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:9px;
+    color:var(--muted);
+    font-size:12px;
+    font-weight:950;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+}
+
+.form-input{
+    width:100%;
+    height:56px;
+    border-radius:18px;
+    border:1px solid var(--border);
+    background:var(--surface2);
+    color:var(--text);
+    outline:none;
+    padding:0 16px;
+    font-size:14px;
+    font-weight:800;
+    transition:.3s;
+}
+
+.form-input:focus{
+    border-color:#6c3eff;
+    box-shadow:0 0 0 5px rgba(108,62,255,.12);
+    transform:translateY(-2px);
+}
+
+.form-actions{
+    margin-top:20px;
+}
+
+.details-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:24px;
+}
+
+.detail-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:26px;
+    padding:24px;
+    transition:.3s;
+    animation:cardIn .55s ease both;
+}
+
+.detail-card:nth-child(1){animation-delay:.05s;}
+.detail-card:nth-child(2){animation-delay:.1s;}
+.detail-card:nth-child(3){animation-delay:.15s;}
+.detail-card:nth-child(4){animation-delay:.2s;}
+.detail-card:nth-child(5){animation-delay:.25s;}
+.detail-card:nth-child(6){animation-delay:.3s;}
+
+@keyframes cardIn{
+    from{opacity:0; transform:translateY(20px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+.detail-card:hover{
+    transform:translateY(-7px);
+    box-shadow:0 18px 38px rgba(15,23,42,.08);
+}
+
+.label{
+    color:var(--muted);
+    font-size:12px;
+    font-weight:950;
+    text-transform:uppercase;
+    letter-spacing:.7px;
+    margin-bottom:10px;
+}
+
+.value{
+    font-size:20px;
+    font-weight:950;
+    color:var(--text);
+    word-break:break-word;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:24px;
+}
+
+.stat-card{
+    position:relative;
+    overflow:hidden;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:30px;
+    padding:26px;
+    text-align:center;
+    transition:.3s;
+}
+
+.stat-card:hover{
+    transform:translateY(-7px);
+    box-shadow:0 18px 40px rgba(15,23,42,.08);
+}
+
+.stat-icon{
+    width:54px;
+    height:54px;
+    border-radius:20px;
+    margin:0 auto 14px;
+    display:grid;
+    place-items:center;
+    background:var(--surface2);
+    font-size:24px;
+}
+
+.stat-card h2{
+    font-size:42px;
+    font-weight:950;
+}
+
+.stat-card p{
+    margin-top:6px;
+    color:var(--muted);
+    font-size:14px;
+    font-weight:800;
+}
+
+.blue{color:#38bdf8;}
+.green{color:#22c55e;}
+.red{color:#ef4444;}
+
+.face-gallery{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:34px;
+    padding:28px;
+}
+
+.gallery-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:14px;
+    margin-bottom:22px;
+}
+
+.gallery-header h2{
+    font-size:24px;
+    font-weight:950;
+    color:var(--text);
+}
+
+.gallery-count{
+    padding:9px 15px;
+    border-radius:999px;
+    background:var(--surface2);
+    color:var(--muted);
+    font-size:13px;
+    font-weight:900;
+}
+
+.gallery-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:18px;
+}
+
+.face-card{
+    position:relative;
+    overflow:hidden;
+    border-radius:24px;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    transition:.35s;
+    animation:faceIn .55s ease both;
+}
+
+@keyframes faceIn{
+    from{opacity:0; transform:scale(.92);}
+    to{opacity:1; transform:scale(1);}
+}
+
+.face-card:hover{
+    transform:translateY(-8px) scale(1.02);
+    box-shadow:0 18px 38px rgba(108,62,255,.18);
+}
+
+.face-card img{
+    width:100%;
+    height:175px;
+    object-fit:cover;
+    display:block;
+}
+
+.empty-face{
+    text-align:center;
+    padding:42px;
+    border-radius:24px;
+    background:var(--surface2);
+    color:var(--muted);
+    font-size:15px;
+    font-weight:800;
+}
+
+@media(max-width:1000px){
+    .profile-hero,
+    .details-grid,
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+@media(max-width:650px){
+    .profile-top{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .profile-name{
+        font-size:34px;
+    }
+
+    .gallery-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+}
+</style>
+
+<div class="profile-page">
+
+    <section class="profile-hero">
+
+        <div class="profile-card">
+            <div class="profile-top">
+
+                {% if student.profile_photo %}
+                    <img src="{{ student.profile_photo.url }}" class="profile-img">
+                {% else %}
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-img">
+                {% endif %}
+
+                <div>
+                    <div class="profile-name">
+                        {{ student.user.first_name }}
+                    </div>
+
+                    <div class="profile-meta">
+                        {{ student.department.name }} • {{ student.class_name.name }}
+                    </div>
+
+                    <div class="btn-group">
+                        <button onclick="toggleEditForm()" class="action-btn">
+                            ✏️ Update Profile
+                        </button>
+
+                        <a href="{% url 'liveliness' %}" class="action-btn face-btn">
+                            📸 Register Face
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="quick-card">
+            <div class="quick-title">Student Snapshot</div>
+
+            <div class="quick-item">
+                <div class="quick-icon">🆔</div>
+                <div>
+                    <div class="quick-label">Register Number</div>
+                    <div class="quick-value">{{ student.register_number }}</div>
+                </div>
+            </div>
+
+            <div class="quick-item">
+                <div class="quick-icon">📧</div>
+                <div>
+                    <div class="quick-label">Email</div>
+                    <div class="quick-value">{{ student.user.email }}</div>
+                </div>
+            </div>
+
+            <div class="quick-item">
+                <div class="quick-icon">📅</div>
+                <div>
+                    <div class="quick-label">Joined Date</div>
+                    <div class="quick-value">{{ student.user.date_joined|date:"d M Y" }}</div>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <section id="editForm" class="edit-form">
+        <div class="form-title">Update Profile</div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" value="{{ student.user.first_name }}" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" value="{{ student.user.email }}" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" value="{{ student.phone }}" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label>Profile Photo</label>
+                    <input type="file" name="profile_photo" class="form-input">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="action-btn">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="details-grid">
+
+        <div class="detail-card">
+            <div class="label">Register Number</div>
+            <div class="value">{{ student.register_number }}</div>
+        </div>
+
+        <div class="detail-card">
+            <div class="label">Email Address</div>
+            <div class="value">{{ student.user.email }}</div>
+        </div>
+
+        <div class="detail-card">
+            <div class="label">Phone Number</div>
+            <div class="value">{{ student.phone }}</div>
+        </div>
+
+        <div class="detail-card">
+            <div class="label">Department</div>
+            <div class="value">{{ student.department.name }}</div>
+        </div>
+
+        <div class="detail-card">
+            <div class="label">Class</div>
+            <div class="value">{{ student.class_name.name }}</div>
+        </div>
+
+        <div class="detail-card">
+            <div class="label">Joined Date</div>
+            <div class="value">{{ student.user.date_joined|date:"d M Y" }}</div>
+        </div>
+
+    </section>
+
+    <section class="stats">
+
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <h2 class="blue">{{ total_classes|default:"0" }}</h2>
+            <p>Total Classes</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <h2 class="green">{{ present_count|default:"0" }}</h2>
+            <p>Present</p>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">❌</div>
+            <h2 class="red">{{ absent_count|default:"0" }}</h2>
+            <p>Absent</p>
+        </div>
+
+    </section>
+
+    <section class="face-gallery">
+
+        <div class="gallery-header">
+            <h2>🎭 Face Dataset</h2>
+            <div class="gallery-count">{{ total_faces }} Images</div>
+        </div>
+
+        {% if student_faces %}
+
+            <div class="gallery-grid">
+                {% for face in student_faces %}
+                    <div class="face-card">
+                        <img src="{{ face.image.url }}" alt="face">
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+
+            <div class="empty-face">
+                No face images captured yet.
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+
+<script>
+function toggleEditForm(){
+    const form = document.getElementById("editForm");
+
+    if(form.style.display === "block"){
+        form.style.display = "none";
+    }else{
+        form.style.display = "block";
+        form.scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+    }
+}
+</script>
+
+{% endblock %}
