@@ -1,14 +1,14 @@
 from pathlib import Path
 import os
 
-
 # BASE DIRECTORY
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # SECURITY
-SECRET_KEY = 'django-insecure-change-this-key'
-
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "niinrn9coa!=6!v)^+$7b9!mbmzyh*lk=9z^j-6e5ti3x4#ljq"
+)
 
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
@@ -26,18 +26,17 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
     'rest_framework.authtoken',
-    'api',
     'corsheaders',
 
-    # Your apps
+    'api',
     'student',
     'teacher',
     'accounts',
     'admin_panel',
 ]
-
 
 # MIDDLEWARE
 MIDDLEWARE = [
@@ -51,16 +50,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-
-# URL CONFIG
 ROOT_URLCONF = 'core.urls'
 
-
-# TEMPLATES
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # global templates folder
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,19 +67,15 @@ TEMPLATES = [
     },
 ]
 
-
-# WSGI
 WSGI_APPLICATION = 'core.wsgi.application'
 
-
-# DATABASE (SQLite)
+# DATABASE
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # PASSWORD VALIDATION
 AUTH_PASSWORD_VALIDATORS = [
@@ -102,46 +93,28 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# INTERNATIONAL SETTINGS
+# INTERNATIONAL
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# ================================
-# STATIC FILES (FIXED SECTION)
-# ================================
-
+# STATIC FILES
 STATIC_URL = '/static/'
-LOGIN_URL = 'student_login'
-LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/'
-# REQUIRED for collectstatic (fixes your error)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# where your CSS/JS are stored during development
 STATICFILES_DIRS = []
 
-# OR create:
-# core/static/
-
-
-# ================================
-# MEDIA FILES (VERY IMPORTANT)
-# ================================
-
+# MEDIA FILES
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# AUTH
+LOGIN_URL = 'student_login'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/'
 
-# ================================
-# DEFAULT PRIMARY KEY
-# ================================
-
+# DEFAULT PK
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# CORS
 CORS_ALLOW_ALL_ORIGINS = True
